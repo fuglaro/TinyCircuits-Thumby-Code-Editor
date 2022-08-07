@@ -698,6 +698,7 @@ class ReplJS{
         await this.uploadFile("lib/thumbyButton.py", await window.downloadFile("/ThumbyGames/lib/thumbyButton.py"), false);
         window.setPercent(48.2);
         await this.uploadFile("lib/thumbyGraphics.py", await window.downloadFile("/ThumbyGames/lib/thumbyGraphics.py"), false);
+        await this.uploadFile("lib/thumbyGrayscale.py", await window.downloadFile("/ThumbyGames/lib/thumbyGrayscale.py"), false);
         await this.uploadFile("lib/thumbyHardware.py", await window.downloadFile("/ThumbyGames/lib/thumbyHardware.py"), false);
         window.setPercent(50.2);
         await this.uploadFile("lib/thumbyLink.py", await window.downloadFile("/ThumbyGames/lib/thumbyLink.py"), false);
@@ -771,6 +772,7 @@ class ReplJS{
         await this.uploadFile("lib/thumbyButton.py", await window.downloadFile("/ThumbyGames/lib/thumbyButton.py"), false);
         window.setPercent(5);
         await this.uploadFile("lib/thumbyGraphics.py", await window.downloadFile("/ThumbyGames/lib/thumbyGraphics.py"), false);
+        await this.uploadFile("lib/thumbyGrayscale.py", await window.downloadFile("/ThumbyGames/lib/thumbyGrayscale.py"), false);
         await this.uploadFile("lib/thumbyHardware.py", await window.downloadFile("/ThumbyGames/lib/thumbyHardware.py"), false);
         window.setPercent(9);
         await this.uploadFile("lib/thumbyLink.py", await window.downloadFile("/ThumbyGames/lib/thumbyLink.py"), false);
