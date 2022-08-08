@@ -675,7 +675,7 @@ export class EMULATOR{
           const y = row + i;
           const lit = ((curByte & (1 << i)) === 0 ? 0 : 1);
           const shad = ((curShad & (1 << i)) === 0 ? 0 : 1);
-          const bit = (lit ? (shad ? 0.75 : 1) : (shad ? 0.25 : 0)) * this.BRIGHTNESS;
+          const bit = (lit ? (shad ? 0.67 : 1) : (shad ? 0.33 : 0)) * this.BRIGHTNESS;
           const p = (y * this.WIDTH + x) * 4;
           this.PIXELS[p] = bit;
           this.PIXELS[p+1] = bit;
