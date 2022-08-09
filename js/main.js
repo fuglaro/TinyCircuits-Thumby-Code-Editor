@@ -378,6 +378,16 @@ document.getElementById("IDAddBitmapBuilder").onclick = (event) =>{
     }
 }
 
+// Add bitmap builder panel to layout
+document.getElementById("IDAddGrayscaleBuilder").onclick = (event) =>{
+    if(recursiveFindTitle(myLayout.saveLayout().root.content, "Grayscale Builder") == false){
+        console.log("PAGE: +GrayscaleBuilder");
+        myLayout.addComponent('Grayscale Builder', undefined, 'Grayscale Builder');
+    }else{
+        alert("Only one bitmap builder can be open");
+    }
+}
+
 // Add FS panel to layout
 document.getElementById("IDAddFS").onclick = (event) =>{
     if(recursiveFindTitle(myLayout.saveLayout().root.content, "Filesystem") == false){
@@ -783,6 +793,21 @@ function registerBitmapBuilder(_container, state){
     }
 }
 
+// Setup Grayscale builder module
+var GRAYSCALEMAPPER = undefined;
+function registerGrayscaleBuilder(_container, state){
+    GRAYSCALEMAPPER = new GRAYSCALE_BUILDER(_container, state);
+    GRAYSCALEMAPPER.onExport = (lines) => {
+        if(LAST_ACTIVE_EDITOR != undefined){
+            LAST_ACTIVE_EDITOR.insert(lines)
+        }
+    }
+    GRAYSCALEMAPPER.onImport = () => {
+        if(LAST_ACTIVE_EDITOR != undefined){
+            return LAST_ACTIVE_EDITOR.getSelectedText();
+        }
+    }
+}
 
 
 ARCADE.onDownload = async (thumbyURL, binaryFileContents) => {
@@ -861,6 +886,7 @@ ARCADE.onOpen = async (arcadeGameFileURLS) => {
 // Register Golden layout panels
 myLayout.registerComponentConstructor("Bitmap Builder", registerBitmapBuilder);
 myLayout.registerComponentConstructor("Filesystem", registerFilesystem);
+myLayout.registerComponentConstructor("Grayscale Builder", registerGrayscaleBuilder);
 myLayout.registerComponentConstructor("Editor", registerEditor);
 myLayout.registerComponentConstructor("Shell", registerShell);
 myLayout.registerComponentConstructor("Emulator", registerEmulator);
