@@ -447,6 +447,12 @@ document.getElementById("IDAddEditorBTN").onclick = (event) =>{
     myLayout.addComponent('Editor', undefined, 'Editor');
 }
 
+// Add editor panel to layout
+document.getElementById("IDAddBlocklyEditorBTN").onclick = (event) =>{
+    console.log("PAGE: +BlocklyEditor");
+    myLayout.addComponent('Editor', {'isBlockly':true}, 'Editor');
+}
+
 // Add bitmap builder panel to layout
 document.getElementById("IDAddBitmapBuilder").onclick = (event) =>{
     if(recursiveFindTitle(myLayout.saveLayout().root.content, "Bitmap Builder: 8 x 8") == false){

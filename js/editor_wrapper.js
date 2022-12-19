@@ -71,6 +71,9 @@ class EditorWrapper{
                             "    # Display the bitmap using bitmap data, position, and bitmap dimensions\n" +
                             "    thumby.display.drawSprite(thumbySprite)\n" +
                             "    thumby.display.update()\n";
+        if(state.isBlockly){
+            this.defaultCode = "";
+        }
 
         this.initEditorPanelUI(state["value"]);
 
@@ -410,25 +413,39 @@ class EditorWrapper{
         this.FILE_DROPDOWN_UL.appendChild(listElem);
 
         var isBinary = localStorage.getItem("isBinary" + this.ID);
+        var isBlockly = localStorage.getItem("isBlockly" + this.ID) || this.state.isBlockly;
 
-        if(data == undefined && isBinary != null && isBinary == "true"){                                                        // If was binary viewer last time, should still be
+        if(data == undefined && (isBlockly == "true" || isBlockly == true)) {
+            console.log("INIT BLOCKLY VIEWER");
+            localStorage.setItem("isBlockly" + this.ID, true);
+            localStorage.setItem("isBinary" + this.ID, false);
+            this.turnIntoBlocklyViewer(data);
+        }else if(data == undefined && isBinary != null && isBinary == "true"){                                                        // If was binary viewer last time, should still be
             console.log("INIT BINARY VIEWER");
+            localStorage.setItem("isBlockly" + this.ID, false);
             localStorage.setItem("isBinary" + this.ID, true);
             this.turnIntoBinaryViewer();
         }else if((data == undefined && isBinary == null) || (data == undefined && isBinary != null && isBinary == "false")){    // No data and not binary, new editor with default code
             console.log("INIT CODE VIEWER");
+            localStorage.setItem("isBlockly" + this.ID, false);
             localStorage.setItem("isBinary" + this.ID, false);
             this.turnIntoCodeViewer(data);
         }else if(data != undefined){
-
             // Check if the decoded data contains binary replacement letters (could also check that most characters only equal ascii chars)
-            var decodedData = new TextDecoder().decode(new Uint8Array(data));
-            if(decodedData.indexOf("�") == -1 && decodedData.indexOf("") == -1 && decodedData.indexOf("") == -1 && decodedData.indexOf("") == -1){
-                console.log("INIT CODE VIEWER");
+            var text = typeof data == "string" ? data : new TextDecoder().decode(new Uint8Array(data));
+            if(text && text.startsWith("{") && text.indexOf('{"blocks":{"') != -1){
+                console.log("INIT BLOCKLY VIEWER");
+                localStorage.setItem("isBlockly" + this.ID, true);
                 localStorage.setItem("isBinary" + this.ID, false);
-                this.turnIntoCodeViewer(decodedData);
+                this.turnIntoBlocklyViewer(text);
+            }else if(text.indexOf("�") == -1 && text.indexOf("") == -1 && text.indexOf("") == -1 && text.indexOf("") == -1){
+                console.log("INIT CODE VIEWER");
+                localStorage.setItem("isBlockly" + this.ID, false);
+                localStorage.setItem("isBinary" + this.ID, false);
+                this.turnIntoCodeViewer(text);
             }else{
                 console.log("INIT BINARY VIEWER");
+                localStorage.setItem("isBlockly" + this.ID, false);
                 localStorage.setItem("isBinary" + this.ID, true);
                 this.turnIntoBinaryViewer(data);
             }
@@ -533,7 +550,80 @@ class EditorWrapper{
         }
     }
 
+    async turnIntoBlocklyViewer(data){
+        this.isBlockly = true;
+        if(this.ACE_EDITOR) this.ACE_EDITOR.destroy();
 
+        // Make the editor area
+        if(!this.BLOCKLY_DIV){
+            this.BLOCKLY_DIV = document.createElement("div");
+            this.BLOCKLY_DIV.style.position = "absolute";
+            this.BLOCKLY_TOOLBOX = document.createElement("div");
+            this.BLOCKLY_TOOLBOX.style.display = "none";
+        }
+        this.EDITOR_DIV.appendChild(this.BLOCKLY_DIV);
+        this.EDITOR_DIV.appendChild(this.BLOCKLY_TOOLBOX );
+
+        this.OPEN_PYTHON = document.createElement("button");
+        this.OPEN_PYTHON.classList = "uk-button uk-button-primary uk-height-1-1 uk-text-small uk-text-nowrap";
+        this.OPEN_PYTHON.textContent = "Open Python";
+        this.OPEN_PYTHON.title = "Open a new editor with the Python from this code";
+        this.OPEN_PYTHON.onclick = (ev) => {
+            this._container.layoutManager.addComponent('Editor', {'value':this.getValue()}, 'Editor');
+            ev.stopPropagation(); // Stop the focus return to this Widget.
+        };
+        this.HEADER_TOOLBAR_DIV.appendChild(this.OPEN_PYTHON);
+
+        this.FAST_EXECUTE_BUTTON = document.createElement("button");
+        this.FAST_EXECUTE_BUTTON.classList = "uk-button uk-button-primary uk-height-1-1 uk-text-small uk-text-nowrap";
+        this.FAST_EXECUTE_BUTTON.textContent = "\u21bb Fast Execute";
+        this.FAST_EXECUTE_BUTTON.title = "Execute editor contents at root '/' of Thumby";
+        this.FAST_EXECUTE_BUTTON.onclick = () => {this.onFastExecute(this.getValue())};
+        this.HEADER_TOOLBAR_DIV.appendChild(this.FAST_EXECUTE_BUTTON);
+
+        const toolbox = await (await fetch("blockly/toolbox.xml")).text();
+        this.BLOCKLY_TOOLBOX.innerHTML = toolbox;
+        if(!this.BLOCKLY_WORKSPACE){
+            this.BLOCKLY_WORKSPACE = Blockly.inject(this.BLOCKLY_DIV,
+                {toolbox: document.getElementById("toolbox")});
+            this.BLOCKLY_WORKSPACE.addChangeListener((e)=>{
+                if(e.type == Blockly.Events.FINISHED_LOADING || e.isUiEvent){return}
+                localStorage.setItem("EditorValue" + this.ID, JSON.stringify(
+                    Blockly.serialization.workspaces.save(this.BLOCKLY_WORKSPACE)));
+                if(this.SAVED_TO_THUMBY == true || this.SAVED_TO_THUMBY == undefined){
+                    if(this.EDITOR_PATH != undefined){
+                        this.setTitle("Editor" + this.ID + ' - *' + this.EDITOR_PATH);
+                    }else{
+                        this.setTitle("*Editor" + this.ID);
+                    }
+                    this.SAVED_TO_THUMBY = false;
+                    localStorage.setItem("EditorSavedToThumby" + this.ID, this.SAVED_TO_THUMBY);
+                }
+            });
+        }
+        this.resize();
+
+        // Saving and restoring of editor state
+        var lastEditorValue = localStorage.getItem("EditorValue" + this.ID);
+        if(data != undefined){
+            Blockly.serialization.workspaces.load(JSON.parse(data), this.BLOCKLY_WORKSPACE);
+        }else if(lastEditorValue != null){
+            Blockly.serialization.workspaces.load(JSON.parse(lastEditorValue), this.BLOCKLY_WORKSPACE);
+        }else{
+            Blockly.serialization.workspaces.load(this.defaultCode, this.BLOCKLY_WORKSPACE);
+
+            // When adding default editors, give them a path but make each unique by looking at all other open editors
+            if(this.checkAllEditorsForPath("/Games/HelloWorld/HelloWorld.py") == true){
+                var helloWorldNum = 1;
+                while(this.checkAllEditorsForPath("/Games/HelloWorld/HelloWorld" + helloWorldNum + ".py")){
+                    helloWorldNum = helloWorldNum + 1;
+                }
+                this.setPath("/Games/HelloWorld/HelloWorld" + helloWorldNum + ".py");
+            }else{
+                this.setPath("/Games/HelloWorld/HelloWorld.py");
+            }
+        }
+    }
 
     turnIntoCodeViewer(data){
         var listElem = document.createElement("li");
@@ -840,11 +930,21 @@ class EditorWrapper{
         localStorage.removeItem("EditorFontSize" + this.ID);
         localStorage.removeItem("EditorSavedToThumby" + this.ID);
         localStorage.removeItem("isBinary" + this.ID);
+        localStorage.removeItem("isBlockly" + this.ID);
     }
 
 
-    resize(){
+    async resize(){
         if(this.ACE_EDITOR != undefined) this.ACE_EDITOR.resize();
+
+        if(this.isBlockly && this.BLOCKLY_WORKSPACE){
+            // Position blocklyDiv over blocklyArea.
+            this.BLOCKLY_DIV.style.left = '0px';
+            this.BLOCKLY_DIV.style.top = `{this.BLOCKLY_WORKSPACE.height}px`;
+            this.BLOCKLY_DIV.style.width = this.EDITOR_DIV.clientWidth + 'px';
+            this.BLOCKLY_DIV.style.height = this.EDITOR_DIV.clientHeight + 'px';
+            Blockly.svgResize(this.BLOCKLY_WORKSPACE);
+        }
     }
 
 
@@ -999,7 +1099,11 @@ class EditorWrapper{
 
         var file = fileHandle.getFile();                                                // Get file from promise so that the name can be retrieved
         var data = undefined;
-        if(!this.isEditorBinary()){
+        if(this.isBlockly){
+            data = JSON.stringify(Blockly.serialization.workspaces.save(this.BLOCKLY_WORKSPACE));
+            await writeStream.write(data);
+            writeStream.close();
+        }else if(!this.isEditorBinary()){
             data = await this.ACE_EDITOR.getValue();
             await writeStream.write(data);                                              // Write data if using an HTTPS connection
             writeStream.close();                                                        // Save the data to the file now
@@ -1016,7 +1120,11 @@ class EditorWrapper{
 
     // Expose common Ace editor operation
     getValue(){
-        return this.ACE_EDITOR.getValue();
+        if(this.isBlockly){
+            return Blockly.Python.workspaceToCode(this.BLOCKLY_WORKSPACE);
+        }else{
+            return this.ACE_EDITOR.getValue();
+        }
     }
 
     // Expose common Ace editor operation
