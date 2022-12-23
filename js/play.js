@@ -230,15 +230,6 @@ else {
     games.sort();
 
     // Load the menu
-    await fetch("ThumbyGames/main.py").then(async (response) => {
-        (new EditorWrapper(conta, {"id": "PlayerEditorMain"}, EDITORS)).clearStorage();
-        MAIN_EDITOR = new EditorWrapper(conta, {
-            "id": "PlayerEditorMain",
-            "path": "/menuLauncher.py",
-            "value": Array.from(new Uint8Array(await response.arrayBuffer())),
-            "mainChecked": true
-        }, EDITORS);
-    });
     await fetch("ThumbyGames/menu.py").then(async (response) => {
         (new EditorWrapper(conta, {"id": "PlayerEditorMenu"}, EDITORS)).clearStorage();
         var data = new TextDecoder("utf-8").decode(new Uint8Array(await response.arrayBuffer()));
@@ -252,11 +243,11 @@ else {
         data = data.replace(
             'mem32[0x4005800C]=1',
             'print(f"HEYTHUMBY!LOAD:{files[selpos] if selpos >=0 else ""}")')
-        new EditorWrapper(conta, {
+        MAIN_EDITOR = new EditorWrapper(conta, {
             "id": "PlayerEditorMenu",
             "path": "/menu.py",
             "value": Array.from(new TextEncoder("utf-8").encode(data)),
-            "normalChecked": true
+            "mainChecked": true
         }, EDITORS);
     });
     await fetch("ThumbyGames/lib/credits.txt").then(async (response) => {
