@@ -550,7 +550,7 @@ class EditorWrapper{
         }
     }
 
-    async turnIntoBlocklyViewer(data){
+    turnIntoBlocklyViewer(data){
         this.isBlockly = true;
         if(this.ACE_EDITOR) this.ACE_EDITOR.destroy();
 
@@ -558,11 +558,8 @@ class EditorWrapper{
         if(!this.BLOCKLY_DIV){
             this.BLOCKLY_DIV = document.createElement("div");
             this.BLOCKLY_DIV.style.position = "absolute";
-            this.BLOCKLY_TOOLBOX = document.createElement("div");
-            this.BLOCKLY_TOOLBOX.style.display = "none";
         }
         this.EDITOR_DIV.appendChild(this.BLOCKLY_DIV);
-        this.EDITOR_DIV.appendChild(this.BLOCKLY_TOOLBOX );
 
         this.OPEN_PYTHON = document.createElement("button");
         this.OPEN_PYTHON.classList = "uk-button uk-button-primary uk-height-1-1 uk-text-small uk-text-nowrap";
@@ -581,48 +578,57 @@ class EditorWrapper{
         this.FAST_EXECUTE_BUTTON.onclick = () => {this.onFastExecute(this.getValue())};
         this.HEADER_TOOLBAR_DIV.appendChild(this.FAST_EXECUTE_BUTTON);
 
-        const toolbox = await (await fetch("blockly/toolbox.xml")).text();
-        this.BLOCKLY_TOOLBOX.innerHTML = toolbox;
-        if(!this.BLOCKLY_WORKSPACE){
-            this.BLOCKLY_WORKSPACE = Blockly.inject(this.BLOCKLY_DIV,
-                {toolbox: document.getElementById("toolbox")});
-            this.BLOCKLY_WORKSPACE.addChangeListener((e)=>{
-                if(e.type == Blockly.Events.FINISHED_LOADING || e.isUiEvent){return}
-                localStorage.setItem("EditorValue" + this.ID, JSON.stringify(
-                    Blockly.serialization.workspaces.save(this.BLOCKLY_WORKSPACE)));
-                if(this.SAVED_TO_THUMBY == true || this.SAVED_TO_THUMBY == undefined){
-                    if(this.EDITOR_PATH != undefined){
-                        this.setTitle("Editor" + this.ID + ' - *' + this.EDITOR_PATH);
-                    }else{
-                        this.setTitle("*Editor" + this.ID);
+        this._container.addEventListener("show", ()=>{
+            if(!this.BLOCKLY_WORKSPACE){
+                this.BLOCKLY_WORKSPACE = Blockly.inject(this.BLOCKLY_DIV,{
+                    toolbox: blocklyToolbox,
+                    move:{
+                        scrollbars: {horizontal: true, vertical: true},
+                        drag: true,
+                        wheel: true},
+                    zoom:{controls: true, wheel: false,
+                        startScale: 1, maxScale: 1, minScale: 0.1, scaleSpeed: 1.2,
+                    pinch: false},
+                    trashcan: true});
+                this.BLOCKLY_WORKSPACE.addChangeListener((e)=>{
+                    if(e.type == Blockly.Events.FINISHED_LOADING || e.isUiEvent){return}
+                    localStorage.setItem("EditorValue" + this.ID, JSON.stringify(
+                        Blockly.serialization.workspaces.save(this.BLOCKLY_WORKSPACE)));
+                    if(this.SAVED_TO_THUMBY == true || this.SAVED_TO_THUMBY == undefined){
+                        if(this.EDITOR_PATH != undefined){
+                            this.setTitle("Editor" + this.ID + ' - *' + this.EDITOR_PATH);
+                        }else{
+                            this.setTitle("*Editor" + this.ID);
+                        }
+                        this.SAVED_TO_THUMBY = false;
+                        localStorage.setItem("EditorSavedToThumby" + this.ID, this.SAVED_TO_THUMBY);
                     }
-                    this.SAVED_TO_THUMBY = false;
-                    localStorage.setItem("EditorSavedToThumby" + this.ID, this.SAVED_TO_THUMBY);
-                }
-            });
-        }
-        this.resize();
-
-        // Saving and restoring of editor state
-        var lastEditorValue = localStorage.getItem("EditorValue" + this.ID);
-        if(data != undefined){
-            Blockly.serialization.workspaces.load(JSON.parse(data), this.BLOCKLY_WORKSPACE);
-        }else if(lastEditorValue != null){
-            Blockly.serialization.workspaces.load(JSON.parse(lastEditorValue), this.BLOCKLY_WORKSPACE);
-        }else{
-            Blockly.serialization.workspaces.load(this.defaultCode, this.BLOCKLY_WORKSPACE);
-
-            // When adding default editors, give them a path but make each unique by looking at all other open editors
-            if(this.checkAllEditorsForPath("/Games/HelloWorld/HelloWorld.py") == true){
-                var helloWorldNum = 1;
-                while(this.checkAllEditorsForPath("/Games/HelloWorld/HelloWorld" + helloWorldNum + ".py")){
-                    helloWorldNum = helloWorldNum + 1;
-                }
-                this.setPath("/Games/HelloWorld/HelloWorld" + helloWorldNum + ".py");
-            }else{
-                this.setPath("/Games/HelloWorld/HelloWorld.py");
+                });
+                blocklyRegister(this.BLOCKLY_WORKSPACE);
             }
-        }
+            this.resize();
+
+            // Saving and restoring of editor state
+            var lastEditorValue = localStorage.getItem("EditorValue" + this.ID);
+            if(data != undefined){
+                Blockly.serialization.workspaces.load(JSON.parse(data), this.BLOCKLY_WORKSPACE);
+            }else if(lastEditorValue != null){
+                Blockly.serialization.workspaces.load(JSON.parse(lastEditorValue), this.BLOCKLY_WORKSPACE);
+            }else{
+                Blockly.serialization.workspaces.load(this.defaultCode, this.BLOCKLY_WORKSPACE);
+
+                // When adding default editors, give them a path but make each unique by looking at all other open editors
+                if(this.checkAllEditorsForPath("/Games/HelloWorld/HelloWorld.py") == true){
+                    var helloWorldNum = 1;
+                    while(this.checkAllEditorsForPath("/Games/HelloWorld/HelloWorld" + helloWorldNum + ".py")){
+                        helloWorldNum = helloWorldNum + 1;
+                    }
+                    this.setPath("/Games/HelloWorld/HelloWorld" + helloWorldNum + ".py");
+                }else{
+                    this.setPath("/Games/HelloWorld/HelloWorld.py");
+                }
+            }
+        });
     }
 
     turnIntoCodeViewer(data){
