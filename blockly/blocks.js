@@ -1,6 +1,17 @@
 
-Blockly.Msg.FLOW_HUE = 50;
+Blockly.Msg.FLOW_HUE = 70;
 Blockly.Msg.ADVANCED_HUE = 0;
+Blockly.Msg.BUTTON_HUE = 15;
+Blockly.Msg.GRAPHICS_HUE = 30;
+Blockly.Msg.AUDIO_HUE = 45;
+Blockly.Msg.SAVES_HUE = Blockly.Msg.VARIABLES_HUE;
+
+const PY = Blockly.Python;
+const NM = Blockly.Names;
+const VAR = Blockly.Variables;
+const EX = Blockly.Extensions;
+
+var _blscratch = document.createElement('canvas');
 
 var blocklyToolbox = {
   "contents": [
@@ -143,21 +154,89 @@ var blocklyToolbox = {
       "kind": "CATEGORY", "categorystyle": "procedure_category",
       "custom": "PROCEDURE"
     },
-    {"kind": "SEP"},
     {
       "name": "Flow",
       "kind": "CATEGORY", "colour": "%{BKY_FLOW_HUE}",
+      "custom": "FLOW"
+    },
+    {"kind": "SEP"},
+    {
+      "name": "Buttons",
+      "kind": "CATEGORY", "colour": "%{BKY_BUTTON_HUE}",
       "contents": [
-        {"type": "wait", "kind": "BLOCK", "inputs": {
-          "TIME": {"shadow": {"type": "math_number", "fields": {"NUM": 1}}}},
-        },
-        {"type": "ticks_ms", "kind": "BLOCK"},
-        {"type": "ticks_diff", "kind": "BLOCK"},
-        {"text": "Create timer...", "kind": "button",
-          "callbackKey": "createTimer"
-        },
-        {"type": "timer", "kind": "BLOCK"},
-        {"type": "stop_timer", "kind": "BLOCK"},
+        {"type": "button_pressed", "kind": "BLOCK", "gap": "2", "fields": {"BUTTON": "buttonL.pressed"}},
+        {"type": "button_pressed", "kind": "BLOCK", "gap": "2", "fields": {"BUTTON": "buttonR.pressed"}},
+        {"type": "button_pressed", "kind": "BLOCK", "gap": "2", "fields": {"BUTTON": "buttonU.pressed"}},
+        {"type": "button_pressed", "kind": "BLOCK", "gap": "2", "fields": {"BUTTON": "buttonD.pressed"}},
+        {"type": "button_pressed", "kind": "BLOCK", "gap": "2", "fields": {"BUTTON": "buttonB.pressed"}},
+        {"type": "button_pressed", "kind": "BLOCK", "fields": {"BUTTON": "buttonA.pressed"}},
+        {"type": "button_justPressed", "kind": "BLOCK", "gap": "2", "fields": {"BUTTON": "buttonL.justPressed"}},
+        {"type": "button_justPressed", "kind": "BLOCK", "gap": "2", "fields": {"BUTTON": "buttonR.justPressed"}},
+        {"type": "button_justPressed", "kind": "BLOCK", "gap": "2", "fields": {"BUTTON": "buttonU.justPressed"}},
+        {"type": "button_justPressed", "kind": "BLOCK", "gap": "2", "fields": {"BUTTON": "buttonD.justPressed"}},
+        {"type": "button_justPressed", "kind": "BLOCK", "gap": "2", "fields": {"BUTTON": "buttonB.justPressed"}},
+        {"type": "button_justPressed", "kind": "BLOCK", "fields": {"BUTTON": "buttonA.justPressed"}},
+      ]
+    },
+    {
+      "name": "Graphics",
+      "kind": "CATEGORY", "colour": "%{BKY_GRAPHICS_HUE}",
+      "contents": [
+        {"type": "print_to_display", "kind": "BLOCK"},
+        {"type": "display_drawing", "kind": "BLOCK"},
+        {"type": "drawFill", "kind": "BLOCK", "gap": "2"},
+        {"type": "drawPixel", "kind": "BLOCK", "gap": "2", "inputs": {
+          "X": {"shadow": {"type": "math_number", "fields": {"NUM": 0}}},
+          "Y": {"shadow": {"type": "math_number", "fields": {"NUM": 0}}}}},
+        {"type": "drawText", "kind": "BLOCK", "gap": "2", "inputs": {
+          "VAL": {"shadow": {"type": "text", "fields": {"TEXT": "Hello World"}}},
+          "X": {"shadow": {"type": "math_number", "fields": {"NUM": 0}}},
+          "Y": {"shadow": {"type": "math_number", "fields": {"NUM": 0}}}}},
+        {"type": "drawLine", "kind": "BLOCK", "gap": "2", "inputs": {
+          "X": {"shadow": {"type": "math_number", "fields": {"NUM": 0}}},
+          "Y": {"shadow": {"type": "math_number", "fields": {"NUM": 0}}},
+          "X2": {"shadow": {"type": "math_number", "fields": {"NUM": 20}}},
+          "Y2": {"shadow": {"type": "math_number", "fields": {"NUM": 10}}}}},
+        {"type": "drawRectangle", "kind": "BLOCK", "gap": "2", "inputs": {
+          "X": {"shadow": {"type": "math_number", "fields": {"NUM": 40}}},
+          "Y": {"shadow": {"type": "math_number", "fields": {"NUM": 20}}},
+          "X2": {"shadow": {"type": "math_number", "fields": {"NUM": 8}}},
+          "Y2": {"shadow": {"type": "math_number", "fields": {"NUM": 5}}}}},
+        {"type": "send_drawn_frame_to_display", "kind": "BLOCK",
+          "next": {"block": {"type": "drawFill"}}},
+        {"type": "setFPS", "kind": "BLOCK"},
+        {"type": "setFont", "kind": "BLOCK"},
+        {"type": "get_drawn_pixel", "kind": "BLOCK"},
+      ]
+    },
+    {
+      "name": "Sprites",
+      "kind": "CATEGORY", "colour": "%{BKY_GRAPHICS_HUE}",
+      "custom": "SPRITES"
+    },
+    {
+      "name": "Audio",
+      "kind": "CATEGORY", "colour": "%{BKY_AUDIO_HUE}",
+      "contents": [
+        {"type": "audio_playBlocking", "kind": "BLOCK", "inputs": {
+          "FREQ": {"shadow": {"type": "math_number", "fields": {"NUM": 2000}}},
+          "DURATION": {"shadow": {"type": "math_number", "fields": {"NUM": 1000}}}}},
+        {"type": "audio_play", "kind": "BLOCK", "gap": "2", "inputs": {
+          "FREQ": {"shadow": {"type": "math_number", "fields": {"NUM": 2000}}},
+          "DURATION": {"shadow": {"type": "math_number", "fields": {"NUM": 1000}}}}},
+        {"type": "audio_stop", "kind": "BLOCK"},
+      ]
+    },
+    {
+      "name": "Saves",
+      "kind": "CATEGORY", "colour": "%{BKY_SAVES_HUE}",
+      "contents": [
+        {"text": "Note: saves won't persist in the emulator.", "kind": "label"},
+        {"type": "saves_setItem", "kind": "BLOCK", "inputs": {
+          "VALUE": {"shadow": {"type": "math_number", "fields": {"NUM": 99}}}}},
+        {"type": "saves_getItem", "kind": "BLOCK"},
+        {"type": "saves_hasItem", "kind": "BLOCK"},
+        {"type": "saves_delItem", "kind": "BLOCK"},
       ]
     },
     {
@@ -167,6 +246,13 @@ var blocklyToolbox = {
         {"type": "set_freq", "kind": "BLOCK"},
         {"type": "get_freq", "kind": "BLOCK"},
         {"type": "reset", "kind": "BLOCK"},
+        {"type": "lightsleep", "kind": "BLOCK", "inputs": {
+          "TIME": {"shadow": {"type": "math_number", "fields": {"NUM": 1000}}}},
+        },
+        {"type": "brightness", "kind": "BLOCK", "inputs": {
+          "VAL": {"shadow": {"type": "math_number", "fields": {"NUM": 127}}}},
+        },
+        {"type": "screen_dimensions", "kind": "BLOCK"},
       ]
     },
     {"kind": "SEP"},
@@ -187,14 +273,56 @@ var blocklyToolbox = {
   ]
 };
 
+function blocklyRegister(workspace) {
+
+  workspace.registerToolboxCategoryCallback(
+    'FLOW', (workspace)=>{
+      const timers = workspace.getVariablesOfType('Timer');
+      var blocks = [
+          {"type": "wait", "kind": "BLOCK", "inputs": {
+            "TIME": {"shadow": {"type": "math_number", "fields": {"NUM": 1}}}},
+          },
+          {"type": "ticks_ms", "kind": "BLOCK"},
+          {"type": "ticks_diff", "kind": "BLOCK"},
+          {"type": "timer", "kind": "BLOCK", "gap": timers ? "2" : "8"},
+        ];
+      timers.forEach((timer)=>{blocks.push({"type": "stop_timer",
+        "kind": "BLOCK", "gap": "2", "fields": {"VAR": timer}})});
+      return blocks;
+    }
+  );
+
+  workspace.registerToolboxCategoryCallback(
+    'SPRITES', (workspace)=>{
+      const defaultData = `# BITMAP: width: 32, height: 32
+bitmap0 = bytearray([0,0,0,0,0,0,0,0,248,8,232,40,40,40,40,40,40,40,40,40,40,232,8,248,0,0,0,0,0,0,0,
+                     0,0,0,0,0,0,0,0,0,255,0,63,32,32,32,32,32,32,32,32,32,32,63,0,255,0,0,0,0,0,0,0,
+                     0,0,0,0,0,0,0,0,0,255,0,12,12,63,63,12,12,0,0,24,24,3,3,0,255,0,0,0,0,0,0,0,0,0,
+                     0,0,0,0,0,0,0,31,16,16,16,16,20,18,16,20,18,16,16,16,16,16,31,0,0,0,0,0,0,0,0])`;
+      const sprites = workspace.getVariablesOfType('Sprite');
+      const dsp = sprites.length ? {"VAR": sprites[0]} : {};
+      var blocks = [
+          {"type": "load_sprite", "kind": "BLOCK", "data": defaultData},
+          {"type": "drawSprite", "kind": "BLOCK", "gap": "2", "fields": {...dsp}},
+          {"type": "send_drawn_frame_to_display", "kind": "BLOCK",
+            "next": {"block": {"type": "drawFill"}}},
+          {"type": "flip", "kind": "BLOCK", "gap": "2", "fields": {...dsp}},
+          {"type": "mirror", "kind": "BLOCK", "fields": {...dsp}},
+        ];
+      sprites.forEach((sprite)=>{blocks.unshift({"type": "load_sprite",
+        "data": defaultData, "kind": "BLOCK", "gap": "2", "fields": {"VAR": sprite}})});
+      return blocks;
+    }
+  );
+}
 
 Blockly.defineBlocksWithJsonArray([
   {
     "type": "ticks_diff",
     "message0": 'time from %2 to %1',
     "args0": [
-      {"name": "end", "type": "input_value", "check": "Number"},
-      {"name": "start", "type": "input_value", "check": "Number"}
+      {"name": "end", "type": "input_value", "check": "Number", "align": "RIGHT"},
+      {"name": "start", "type": "input_value", "check": "Number", "align": "RIGHT"}
     ],
     "output": "Number",
     "colour": "%{BKY_FLOW_HUE}",
@@ -224,7 +352,7 @@ Blockly.defineBlocksWithJsonArray([
     "type": "timer",
     "message0": 'timer %1 do %2 %3 ms',
     "args0": [
-      {"name": "NAME", "type": "field_variable", "variable": "timer1",
+      {"name": "VAR", "type": "field_variable",
         "variableTypes": ["Timer"], "defaultType": "Timer"},
       {"name": "MODE", "type": "field_dropdown", "options":
         [["every","PERIODIC"], ["once in","ONE_SHOT"]]},
@@ -237,18 +365,20 @@ Blockly.defineBlocksWithJsonArray([
     "previousStatement": null,
     "nextStatement": null,
     "colour": "%{BKY_FLOW_HUE}",
+    "extensions": ["del_vars_context_menu"],
     "tooltip": "Set a Timer to execute periodically or once after a time given in milliseconds."
   },
   {
     "type": "stop_timer",
     "message0": 'stop %1',
     "args0": [
-      {"name": "NAME", "type": "field_variable", "variable": "timer1",
+      {"name": "VAR", "type": "field_variable",
         "variableTypes": ["Timer"], "defaultType": "Timer"},
     ],
     "previousStatement": null,
     "nextStatement": null,
     "colour": "%{BKY_FLOW_HUE}",
+    "extensions": ["del_vars_context_menu"],
     "tooltip": "Stop a timer."
   },
   {
@@ -278,6 +408,39 @@ Blockly.defineBlocksWithJsonArray([
     "tooltip": "Get CPU clock frequency."
   },
   {
+    "type": "lightsleep",
+    "message0": 'lightsleep for %1 ms',
+    "args0": [
+      {"name": "TIME", "type": "input_value", "check": "Number"},
+    ],
+    "previousStatement": null,
+    "nextStatement": null,
+    "colour": "%{BKY_ADVANCED_HUE}",
+    "tooltip": "Wait for a given time in a low power state."
+  },
+  {
+    "type": "brightness",
+    "message0": 'set brightness to %1',
+    "args0": [
+      {"name": "VAL", "type": "input_value", "check": "Number"},
+    ],
+    "previousStatement": null,
+    "nextStatement": null,
+    "colour": "%{BKY_ADVANCED_HUE}",
+    "tooltip": "Change the brightness of the display (0-127)."
+  },
+  {
+    "type": "screen_dimensions",
+    "message0": 'get screen %1',
+    "args0": [
+      {"name": "DIM", "type": "field_dropdown", "options":
+        [["width","width"], ["height","height"]]},
+    ],
+    "output": "Number",
+    "colour": "%{BKY_ADVANCED_HUE}",
+    "tooltip": "Get the width or height of the screen in pixels."
+  },
+  {
     "type": "exec_python",
     "message0": 'run Python %1',
     "args0": [
@@ -302,11 +465,11 @@ Blockly.defineBlocksWithJsonArray([
     "type": "python_try_catch",
     "message0": 'try %1',
     "args0": [
-      {"name": "try", "type": "input_statement"},
+      {"name": "try", "type": "input_statement", "align": "RIGHT"},
     ],
     "message1": 'catch %1',
     "args1": [
-      {"name": "catch", "type": "input_statement"},
+      {"name": "catch", "type": "input_statement", "align": "RIGHT"},
     ],
     "previousStatement": null,
     "nextStatement": null,
@@ -351,19 +514,389 @@ Blockly.defineBlocksWithJsonArray([
     "colour": "%{BKY_MATH_HUE}",
     "tooltip": "Convert anything to text."
   },
+  {
+    "type": "button_pressed",
+    "message0": '%1 held',
+    "args0": [
+      {"name": "BUTTON", "type": "field_dropdown", "options": [
+        ["left", "buttonL.pressed"], ["right", "buttonR.pressed"],
+        ["up", "buttonU.pressed"], ["down", "buttonD.pressed"],
+        ["button B", "buttonB.pressed"], ["button A", "buttonA.pressed"],
+        ["any input", "inputPressed"], ["dpad", "dpadPressed"],
+        ["button A or B", "actionPressed"]]}
+    ],
+    "output": "Boolean",
+    "colour": "%{BKY_BUTTON_HUE}",
+    "tooltip": "Detect if a button is currently held down."
+  },
+  {
+    "type": "button_justPressed",
+    "message0": '%1 hit',
+    "args0": [
+      {"name": "BUTTON", "type": "field_dropdown", "options": [
+        ["left", "buttonL.justPressed"], ["right", "buttonR.justPressed"],
+        ["up", "buttonU.justPressed"], ["down", "buttonD.justPressed"],
+        ["button B", "buttonB.justPressed"], ["button A", "buttonA.justPressed"],
+        ["any input", "inputJustPressed"], ["dpad", "dpadJustPressed"],
+        ["button A or B", "actionJustPressed"]]}
+    ],
+    "output": "Boolean",
+    "colour": "%{BKY_BUTTON_HUE}",
+    "tooltip": "Detect if a button was pressed down."
+  },
+  {
+    "type": "audio_play",
+    "message0": 'sound %1 Hz for %2 ms',
+    "args0": [
+      {"name": "FREQ", "type": "input_value", "check": "Number"},
+      {"name": "DURATION", "type": "input_value", "check": "Number"},
+    ],
+    "previousStatement": null,
+    "nextStatement": null,
+    "colour": "%{BKY_AUDIO_HUE}",
+    "tooltip": "Plays audio sound frequency for a duration in the background."
+  },
+  {
+    "type": "audio_playBlocking",
+    "message0": 'sound %1 Hz and wait for %2 ms',
+    "args0": [
+      {"name": "FREQ", "type": "input_value", "check": "Number"},
+      {"name": "DURATION", "type": "input_value", "check": "Number"},
+    ],
+    "previousStatement": null,
+    "nextStatement": null,
+    "colour": "%{BKY_AUDIO_HUE}",
+    "tooltip": "Plays audio sound frequency for a duration and waits for audio to finish."
+  },
+  {
+    "type": "audio_stop",
+    "message0": 'stop sound',
+    "previousStatement": null,
+    "nextStatement": null,
+    "colour": "%{BKY_AUDIO_HUE}",
+    "tooltip": "Stops playing any audio started by 'play sound...'."
+  },
+  {
+    "type": "saves_setItem",
+    "message0": 'save %1 : %2',
+    "args0": [
+      {"name": "KEY", "type": "field_input", "text": "high score"},
+      {"name": "VALUE", "type": "input_value"},
+    ],
+    "previousStatement": null,
+    "nextStatement": null,
+    "colour": "%{BKY_SAVES_HUE}",
+    "tooltip": "Sets a game save value."
+  },
+  {
+    "type": "saves_getItem",
+    "message0": 'get %1',
+    "args0": [
+      {"name": "KEY", "type": "field_input", "text": "high score"},
+    ],
+    "output": "String",
+    "colour": "%{BKY_SAVES_HUE}",
+    "tooltip": "Retrieves a game save value."
+  },
+  {
+    "type": "saves_hasItem",
+    "message0": '%1 was set',
+    "args0": [
+      {"name": "KEY", "type": "field_input", "text": "high score"},
+    ],
+    "output": "Boolean",
+    "colour": "%{BKY_SAVES_HUE}",
+    "tooltip": "Checks whether a game save entry has a value."
+  },
+  {
+    "type": "saves_delItem",
+    "message0": 'clear %1',
+    "args0": [
+      {"name": "KEY", "type": "field_input", "text": "high score"},
+    ],
+    "previousStatement": null,
+    "nextStatement": null,
+    "colour": "%{BKY_SAVES_HUE}",
+    "tooltip": "Deletes the entry for a game save value."
+  },
+  {
+    "type": "print_to_display",
+    "message0": 'print to display %1',
+    "args0": [
+      {"name": "VAL", "type": "input_value"},
+    ],
+    "previousStatement": null,
+    "nextStatement": null,
+    "colour": "%{BKY_GRAPHICS_HUE}",
+    "tooltip": "Print text or other data directly to the Thumby display."
+  },
+  {
+    "type": "send_drawn_frame_to_display",
+    "message0": 'send drawn frame to display',
+    "previousStatement": null,
+    "nextStatement": null,
+    "colour": "%{BKY_GRAPHICS_HUE}",
+    "tooltip": "Loads the drawn frame to the display, " +
+      "then briefly pauses until the next frame time. " +
+      " Use [draw ...] blocks for drawing.",
+    "next": {"block":{"type":"drawFill"}}
+  },
+  {
+    "type": "drawPixel",
+    "message0": 'draw %1 pixel at x%2y%3',
+    "args0": [
+      {"name": "COL", "type": "field_dropdown", "options":
+        [["white","1"], ["black","0"]]},
+      {"name": "X", "type": "input_value", "check": "Number", "align": "RIGHT"},
+      {"name": "Y", "type": "input_value", "check": "Number", "align": "RIGHT"},
+    ],
+    "previousStatement": null,
+    "nextStatement": null,
+    "colour": "%{BKY_GRAPHICS_HUE}",
+    "tooltip": "Draws a pixel (on the next frame) at an x,y coordinate. " +
+      "Display the frame to screen with: [send drawn frame to display]"
+  },
+  {
+    "type": "drawText",
+    "message0": 'draw %1 %4 text at x%2y%3',
+    "args0": [
+      {"name": "COL", "type": "field_dropdown", "options":
+        [["white","1"], ["black","0"]]},
+      {"name": "X", "type": "input_value", "check": "Number", "align": "RIGHT"},
+      {"name": "Y", "type": "input_value", "check": "Number", "align": "RIGHT"},
+      {"name": "VAL", "type": "input_value", "check": "String"},
+    ],
+    "previousStatement": null,
+    "nextStatement": null,
+    "colour": "%{BKY_GRAPHICS_HUE}",
+    "tooltip": "On the next frame, draws text from a top-left position. " +
+      "Display the frame to screen with: [send drawn frame to display]"
+  },
+  {
+    "type": "drawLine",
+    "message0": 'draw %1',
+    "args0": [
+      {"name": "COL", "type": "field_dropdown", "options":
+        [["white","1"], ["black","0"]]},
+    ],
+    "message1": 'line from x%1y%2 to x%3y%4',
+    "args1": [
+      {"name": "X", "type": "input_value", "check": "Number", "align": "RIGHT"},
+      {"name": "Y", "type": "input_value", "check": "Number", "align": "RIGHT"},
+      {"name": "X2", "type": "input_value", "check": "Number", "align": "RIGHT"},
+      {"name": "Y2", "type": "input_value", "check": "Number", "align": "RIGHT"},
+    ],
+    "previousStatement": null,
+    "nextStatement": null,
+    "colour": "%{BKY_GRAPHICS_HUE}",
+    "tooltip": "Draws a line (on the next frame) from one point to another. " +
+      "Display the frame to screen with: [send drawn frame to display]"
+  },
+  {
+    "type": "drawRectangle",
+    "message0": 'draw %1',
+    "args0": [
+      {"name": "COL", "type": "field_dropdown", "options":
+        [["white","1"], ["black","0"]]},
+    ],
+    "message1": '%1 at x%2y%3 width%4 height%5',
+    "args1": [
+      {"name": "SHAPE", "type": "field_dropdown", "options":
+        [["rectangle","Rectangle"], ["filled rectangle","FilledRectangle"]]},
+      {"name": "X", "type": "input_value", "check": "Number", "align": "RIGHT"},
+      {"name": "Y", "type": "input_value", "check": "Number", "align": "RIGHT"},
+      {"name": "X2", "type": "input_value", "check": "Number", "align": "RIGHT"},
+      {"name": "Y2", "type": "input_value", "check": "Number", "align": "RIGHT"},
+    ],
+    "previousStatement": null,
+    "nextStatement": null,
+    "colour": "%{BKY_GRAPHICS_HUE}",
+    "tooltip": "Draws a rectangle (on the next frame) with top-left position, " +
+      "and width and height. " +
+      "Display the frame to screen with: [send drawn frame to display]"
+  },
+  {
+    "type": "drawFill",
+    "message0": 'draw %1 fill',
+    "args0": [
+      {"name": "COL", "type": "field_dropdown", "options":
+        [["black","0"], ["white","1"]]},
+    ],
+    "previousStatement": null,
+    "nextStatement": null,
+    "colour": "%{BKY_GRAPHICS_HUE}",
+    "tooltip": "Clears the whole next frame. " +
+      "Display the frame to screen with: [send drawn frame to display]"
+  },
+  {
+    "type": "display_drawing",
+    "message0": 'draw to display',
+    "previousStatement": null,
+    "nextStatement": null,
+    "colour": "%{BKY_GRAPHICS_HUE}",
+    "tooltip": "Sends the drawn frame directly to the display " +
+      "without waiting for the next frame time. Use [draw ...] blocks for drawing."
+  },
+  {
+    "type": "get_drawn_pixel",
+    "message0": 'get drawn pixel at x%1y%2',
+    "args0": [
+      {"name": "X", "type": "input_value", "check": "Number", "align": "RIGHT"},
+      {"name": "Y", "type": "input_value", "check": "Number", "align": "RIGHT"},
+    ],
+    "output": "Number",
+    "colour": "%{BKY_GRAPHICS_HUE}",
+    "tooltip": "Detect the value of the pixel drawn for the next frame: " +
+      "white gives 1, and black gives 0."
+  },
+  {
+    "type": "setFPS",
+    "message0": 'set FPS %1',
+    "args0": [
+      {"name": "FPS", "type": "field_number", "value": 30},
+    ],
+    "previousStatement": null,
+    "nextStatement": null,
+    "colour": "%{BKY_GRAPHICS_HUE}",
+    "tooltip": "Set the number of frames per second that will be sent " +
+      "to the display with [send drawn frame to display]."
+  },
+  {
+    "type": "setFont",
+    "message0": 'set font %1',
+    "args0": [
+      {"name": "FONT", "type": "field_dropdown", "options": [
+        ["TC-5x7","TC-5x7"],
+        ["TC-8x8","TC-8x8"]]},
+    ],
+    "previousStatement": null,
+    "nextStatement": null,
+    "colour": "%{BKY_GRAPHICS_HUE}",
+    "tooltip": "Set the font to use when drawing to the display."
+  },
+  {
+    "type": "load_sprite",
+    "message0": '%1 load sprite %2',
+    "args0": [
+      {"name": "IMG", "type": "field_image", "width": 50, "height": 30,
+        "src": "favicon.png"},
+      {"name": "VAR", "type": "field_variable",
+        "variableTypes": ["Sprite"], "defaultType": "Sprite"},
+    ],
+    "previousStatement": null,
+    "nextStatement": null,
+    "colour": "%{BKY_GRAPHICS_HUE}",
+    "extensions": ["del_vars_context_menu", "update_image_from_sprite"],
+    "tooltip": "Place this block, select it, then use the " +
+      "Bitmap Builder's IMPORT and EXPORT buttons to edit the Sprite image."
+  },
+  {
+    "type": "drawSprite",
+    "message0": 'draw %1',
+    "args0": [
+      {"name": "VAR", "type": "field_variable",
+        "variableTypes": ["Sprite"], "defaultType": "Sprite"},
+    ],
+    "previousStatement": null,
+    "nextStatement": null,
+    "colour": "%{BKY_GRAPHICS_HUE}",
+    "tooltip": "Draws the Sprite (on the next frame). " +
+      "Display the frame to screen with: [send drawn frame to display]"
+  },
+  {
+    "type": "flip",
+    "message0": 'flip %1',
+    "args0": [
+      {"name": "VAR", "type": "field_variable",
+        "variableTypes": ["Sprite"], "defaultType": "Sprite"},
+    ],
+    "previousStatement": null,
+    "nextStatement": null,
+    "colour": "%{BKY_GRAPHICS_HUE}",
+    "tooltip": "Flips the Sprite vertically."
+  },
+  {
+    "type": "mirror",
+    "message0": 'mirror %1',
+    "args0": [
+      {"name": "VAR", "type": "field_variable",
+        "variableTypes": ["Sprite"], "defaultType": "Sprite"},
+    ],
+    "previousStatement": null,
+    "nextStatement": null,
+    "colour": "%{BKY_GRAPHICS_HUE}",
+    "tooltip": "Mirrors the Sprite left to right."
+  },
+
+    // TODO: Sprites
+    //  loading the sprite: only edits the existing class (preserving movement etc)
+    //  drawSprite
+    //  get x position/y position/width/height
+    //  set x to
+    //  set y to
+    //  change x by
+    //  change y by
+    //  send_drawn_frame_to_display
+    //  with mask??? validate same size
+    //  with key???
+    //  setFrame
+    //  getFrame
+    //
+    // TODO: {"type": "setFont_with_sprite", "kind": "BLOCK"},
+    // TODO: add and test setFont_with_sprite by adding Auri's fonts to setFont's dropdown.
+
+
+
+
+
+
+
+
 ]);
 
+EX.registerMixin('del_vars_context_menu', {
+  customContextMenu: function (menu) {
+    if (this.isInFlyout && this.type == 'timer') {return}
+    var variable = this.getField("VAR").getVariable();
+    menu.push({"text": `Rename ${variable.type} ${variable.name}`, "enabled": true,
+      "callback": ()=>{
+        VAR.renameVariable(this.workspace, variable);
+    }})
+    menu.push({"text": `Delete ${variable.type} ${variable.name}`, "enabled": true,
+      "callback": ()=>{
+        this.workspace.deleteVariableById(variable.getId());
+        this.workspace.refreshToolboxSelection();
+    }})
+  }
+});
 
-var PY = Blockly.Python;
-var NM = Blockly.Names;
-var VAR = Blockly.Variables;
-
-function blocklyRegister(workspace) {
-
-  workspace.registerButtonCallback("createTimer", ()=>{
-    Blockly.Variables.createVariableButtonHandler(workspace, null, 'Timer');
-  });
+function updateImageFromSprite(block) {
+  // Build an icon for the block
+  var pixData = block.data.match(
+    /# BITMAP: width: (?<w>[0-9]+), height: (?<h>[0-9]+)\n.*bytearray\((?<b>[^\(\)]+)\)/).groups;
+  if (pixData) {
+    _blscratch.width = parseInt(pixData.w);
+    _blscratch.height = parseInt(pixData.h);
+    const bits = JSON.parse(pixData.b);
+    var context = _blscratch.getContext('2d');
+    for(var x = 0; x < _blscratch.width; x++){
+        for(var y = 0; y < _blscratch.width; y++){
+            context.fillStyle = (
+              bits[x + (~~(y/8))*_blscratch.width] & (1<<y%8)) ? '#fff' : '#000';
+            context.fillRect(x, y, 1, 1);
+        }
+    }
+    block.setFieldValue(_blscratch.toDataURL(), "IMG");
+  }
 }
+
+EX.register('update_image_from_sprite', function() {
+  this.setOnChange(function(event) {
+    if (event.type != Blockly.Events.FINISHED_LOADING || this.isInFlyout || !this.data) {return}
+    updateImageFromSprite(this);
+  });
+});
+
 
 PY['ticks_diff'] = function(block) {
   PY.definitions_['import_time'] = 'import time';
@@ -400,6 +933,24 @@ PY['get_freq'] = function(block) {
   return ['machine.freq() or 0' /*emulator gives None*/, PY.ORDER_LOGICAL_OR];
 };
 
+PY['lightsleep'] = function(block) {
+  PY.definitions_['import_machine'] = 'import machine';
+  var time = PY.valueToCode(block, 'TIME', PY.ORDER_ATOMIC);
+  return `machine.lightsleep(${time})\n`;
+};
+
+PY['brightness'] = function(block) {
+  PY.definitions_['import_graphics'] = 'from thumbyGraphics import display';
+  var val = PY.valueToCode(block, 'VAL', PY.ORDER_ATOMIC);
+  return `display.brightness(${val})\n`;
+};
+
+PY['screen_dimensions'] = function(block) {
+  PY.definitions_['import_graphics'] = 'from thumbyGraphics import display';
+  var dim = block.getFieldValue('DIM');
+  return [`display.${dim}`, PY.ORDER_ATOMIC];
+};
+
 PY['exec_python'] = function(block) {
   var command = PY.valueToCode(block, 'command', PY.ORDER_ATOMIC);
   return `exec(${command})\n`;
@@ -411,8 +962,8 @@ PY['exec_python_output'] = function(block) {
 };
 
 PY['python_try_catch'] = function(block) {
-  var code = PY.statementToCode(block, 'try');
-  var fallback = PY.statementToCode(block, 'catch');
+  var code = PY.statementToCode(block, 'try') || PY.PASS;
+  var fallback = PY.statementToCode(block, 'catch') || PY.PASS;
   return `try:\n${code}except:\n${fallback}\n`;
 };
 
@@ -440,7 +991,7 @@ PY['var_to_float'] = function(block) {
 
 PY['timer'] = function(block) {
   var interval = block.getFieldValue('INTERVAL');
-  var timerName = PY.nameDB_.getName(block.getFieldValue('NAME'), NM.NameType.VARIABLE);
+  var timerName = PY.nameDB_.getName(block.getFieldValue('VAR'), NM.NameType.VARIABLE);
   var run = PY.statementToCode(block, 'STACK') || PY.PASS;
   var mode = block.getFieldValue('MODE');
   PY.definitions_['import_timer'] = 'from machine import Timer';
@@ -460,10 +1011,193 @@ PY['timer'] = function(block) {
   return `${timerName}.init(period=${interval}, mode=Timer.${mode}, callback=____timerFunc____${timerName})\n`;
 };
 
-
 PY['stop_timer'] = function(block) {
-  var timerName = PY.nameDB_.getName(block.getFieldValue('NAME'), NM.NameType.VARIABLE);
+  var timerName = PY.nameDB_.getName(block.getFieldValue('VAR'), NM.NameType.VARIABLE);
   PY.definitions_['import_timer'] = 'from machine import Timer';
   PY.definitions_[`import_timer_setup_${timerName}`] = `${timerName} = Timer()`;
   return `${timerName}.deinit()\n`;
+};
+
+PY['button_pressed'] = function(block) {
+  PY.definitions_['import_buttons'] = 'import thumbyButton as buttons';
+  var button = block.getFieldValue('BUTTON');
+  return [`buttons.${button}()`, PY.ORDER_FUNCTION_CALL];
+};
+PY['button_justPressed'] = PY['button_pressed'];
+
+PY['audio_play'] = function(block) {
+  PY.definitions_['import_audio'] = 'from thumbyAudio import audio';
+  var freq = PY.valueToCode(block, 'FREQ', PY.ORDER_ATOMIC);
+  var duration = PY.valueToCode(block, 'DURATION', PY.ORDER_ATOMIC);
+  return `audio.play(${freq}, ${duration})\n`;
+};
+
+PY['audio_playBlocking'] = function(block) {
+  PY.definitions_['import_audio'] = 'from thumbyAudio import audio';
+  var freq = PY.valueToCode(block, 'FREQ', PY.ORDER_ATOMIC);
+  var duration = PY.valueToCode(block, 'DURATION', PY.ORDER_ATOMIC);
+  return `audio.playBlocking(${freq}, ${duration})\n`;
+};
+
+PY['audio_stop'] = function(block) {
+  PY.definitions_['import_audio'] = 'from thumbyAudio import audio';
+  return `audio.stop()\n`;
+};
+
+const defSaveSsetName = ("saveData.setName(" +
+    "globals().get('__file__', 'FAST_EXECUTE').replace('/Games/',''" +
+    ").strip('/').split('/')[0].split('.')[0])")
+
+PY['saves_setItem'] = function(block) {
+  PY.definitions_['import_saves'] = 'from thumbySaves import saveData';
+  PY.definitions_['saves_saveData_setName'] = defSaveSsetName;
+  var key = PY.quote_(block.getFieldValue('KEY'));
+  var value = PY.valueToCode(block, 'VALUE', PY.ORDER_NONE) || 0;
+  return `saveData.setItem(${key}, ${value})\nsaveData.save()\n`;
+};
+
+PY['saves_getItem'] = function(block) {
+  PY.definitions_['import_saves'] = 'from thumbySaves import saveData';
+  PY.definitions_['saves_saveData_setName'] = defSaveSsetName;
+  var key = PY.quote_(block.getFieldValue('KEY'));
+  return [`saveData.getItem(${key})`, PY.ORDER_FUNCTION_CALL];
+};
+
+PY['saves_hasItem'] = function(block) {
+  PY.definitions_['import_saves'] = 'from thumbySaves import saveData';
+  PY.definitions_['saves_saveData_setName'] = defSaveSsetName;
+  var key = PY.quote_(block.getFieldValue('KEY'));
+  return [`saveData.hasItem(${key})`, PY.ORDER_FUNCTION_CALL];
+};
+
+PY['saves_delItem'] = function(block) {
+  PY.definitions_['import_saves'] = 'from thumbySaves import saveData';
+  PY.definitions_['saves_saveData_setName'] = defSaveSsetName;
+  var key = PY.quote_(block.getFieldValue('KEY'));
+  return `saveData.delItem(${key})`;
+};
+
+PY['print_to_display'] = function(block) {
+  PY.definitions_['import_graphics'] = 'from thumbyGraphics import display';
+  PY.definitions_['function_print_to_display'] = `def print_to_display(message):
+      message = str(message)
+      display.fill(0)
+      txt = [""]
+      for line in message.split("\\n"):
+          for word in line.split(" "):
+              next_len = len(txt[-1]) + len(word) + 1
+              if next_len*display.textWidth + (next_len-1) > display.width:
+                  txt += [""]
+              txt[-1] += (" " if txt[-1] else "") + word
+          txt += [""]
+      for ln, line in enumerate(txt):
+          display.drawText(line, 0, (display.textHeight+1)*ln, 1)
+      display.display.show()
+  `
+  var val = PY.valueToCode(block, 'VAL', PY.ORDER_ATOMIC);
+  return `print_to_display(${val})\n`;
+};
+
+PY['send_drawn_frame_to_display'] = function(block) {
+  PY.definitions_['import_graphics'] = 'from thumbyGraphics import display';
+  return `display.update()\n`;
+};
+
+PY['drawPixel'] = function(block) {
+  PY.definitions_['import_graphics'] = 'from thumbyGraphics import display';
+  var col = block.getFieldValue('COL');
+  var x = PY.valueToCode(block, 'X', PY.ORDER_ATOMIC);
+  var y = PY.valueToCode(block, 'Y', PY.ORDER_ATOMIC);
+  return `display.setPixel(${x}, ${y}, ${col})\n`;
+};
+
+PY['drawFill'] = function(block) {
+  PY.definitions_['import_graphics'] = 'from thumbyGraphics import display';
+  var col = block.getFieldValue('COL');
+  return `display.fill(${col})\n`;
+};
+
+PY['drawText'] = function(block) {
+  PY.definitions_['import_graphics'] = 'from thumbyGraphics import display';
+  var col = block.getFieldValue('COL');
+  var val = PY.valueToCode(block, 'VAL', PY.ORDER_ATOMIC);
+  var x = PY.valueToCode(block, 'X', PY.ORDER_ATOMIC);
+  var y = PY.valueToCode(block, 'Y', PY.ORDER_ATOMIC);
+  return `display.drawText(${val}, ${x}, ${y}, ${col})\n`;
+};
+
+PY['drawLine'] = function(block) {
+  PY.definitions_['import_graphics'] = 'from thumbyGraphics import display';
+  var col = block.getFieldValue('COL');
+  var x = PY.valueToCode(block, 'X', PY.ORDER_ATOMIC);
+  var y = PY.valueToCode(block, 'Y', PY.ORDER_ATOMIC);
+  var x2 = PY.valueToCode(block, 'X2', PY.ORDER_ATOMIC);
+  var y2 = PY.valueToCode(block, 'Y2', PY.ORDER_ATOMIC);
+  return `display.drawLine(${x}, ${y}, ${x2}, ${y2}, ${col})\n`;
+};
+
+PY['drawRectangle'] = function(block) {
+  PY.definitions_['import_graphics'] = 'from thumbyGraphics import display';
+  var col = block.getFieldValue('COL');
+  var shape = block.getFieldValue('SHAPE');
+  var x = PY.valueToCode(block, 'X', PY.ORDER_ATOMIC);
+  var y = PY.valueToCode(block, 'Y', PY.ORDER_ATOMIC);
+  var x2 = PY.valueToCode(block, 'X2', PY.ORDER_ATOMIC);
+  var y2 = PY.valueToCode(block, 'Y2', PY.ORDER_ATOMIC);
+  return `display.draw${shape}(${x}, ${y}, ${x2}, ${y2}, ${col})\n`;
+};
+
+PY['display_drawing'] = function(block) {
+  PY.definitions_['import_graphics'] = 'from thumbyGraphics import display';
+  return `display.display.show()\n`;
+};
+
+PY['setFPS'] = function(block) {
+  PY.definitions_['import_graphics'] = 'from thumbyGraphics import display';
+  var fps = block.getFieldValue('FPS');
+  return `display.setFPS(${fps})\n`;
+};
+
+PY['get_drawn_pixel'] = function(block) {
+  PY.definitions_['import_graphics'] = 'from thumbyGraphics import display';
+  var x = PY.valueToCode(block, 'X', PY.ORDER_ATOMIC);
+  var y = PY.valueToCode(block, 'Y', PY.ORDER_ATOMIC);
+  return [`display.getPixel(${x}, ${y})`, PY.ORDER_FUNCTION_CALL];
+};
+
+PY['setFont'] = function(block) {
+  PY.definitions_['import_graphics'] = 'from thumbyGraphics import display';
+  var font = block.getFieldValue('FONT');
+  if (font == "TC-8x8") {
+    return `display.setFont("/lib/font8x8.bin", 8, 8, 1)\n`
+  }
+  return `display.setFont("/lib/font5x7.bin", 5, 7, 1)\n`;
+};
+
+PY['load_sprite'] = function(block) {
+  var spriteName = PY.nameDB_.getName(block.getFieldValue('VAR'), NM.NameType.VARIABLE);
+  PY.definitions_['import_sprite'] = 'from thumbySprite import Sprite';
+  return `${spriteName} = Sprite(${block.data
+    .replace("# BITMAP: width: ", "")
+    .replace(" height: ", "")
+    .replace(/\n\w+ = /, ",")})\n`;
+};
+
+PY['drawSprite'] = function(block) {
+  var spriteName = PY.nameDB_.getName(block.getFieldValue('VAR'), NM.NameType.VARIABLE);
+  PY.definitions_['import_graphics'] = 'from thumbyGraphics import display';
+  PY.definitions_[`import_sprite_setup_${spriteName}`] = `${spriteName} = Sprite(0,0,[])`;
+  return `display.drawSprite(${spriteName})\n`;
+};
+
+PY['flip'] = function(block) {
+  var spriteName = PY.nameDB_.getName(block.getFieldValue('VAR'), NM.NameType.VARIABLE);
+  PY.definitions_[`import_sprite_setup_${spriteName}`] = `${spriteName} = Sprite(0,0,[])`;
+  return `${spriteName}.mirrorY = 0 if ${spriteName}.mirrorY else 1\n`;
+};
+
+PY['mirror'] = function(block) {
+  var spriteName = PY.nameDB_.getName(block.getFieldValue('VAR'), NM.NameType.VARIABLE);
+  PY.definitions_[`import_sprite_setup_${spriteName}`] = `${spriteName} = Sprite(0,0,[])`;
+  return `${spriteName}.mirrorX = 0 if ${spriteName}.mirrorX else 1\n`;
 };

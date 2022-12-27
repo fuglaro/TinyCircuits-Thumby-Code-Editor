@@ -1140,11 +1140,30 @@ class EditorWrapper{
 
     // Wrapper for the ACE editor insert function, used for exporting custom bitmaps to editor
     insert(str){
-        this.ACE_EDITOR.insert(str);
+        if(this.isBlockly){
+            const sel = Blockly.getSelected();
+            if(sel && sel.type == 'load_sprite'){
+                sel.data = str;
+                // Save the changed state of the workspace
+                localStorage.setItem("EditorValue" + this.ID, JSON.stringify(
+                    Blockly.serialization.workspaces.save(this.BLOCKLY_WORKSPACE)));
+                updateImageFromSprite(sel);
+            }
+            else{
+                alert("Please select a [load sprite] block.")
+            }
+        }else{
+            this.ACE_EDITOR.insert(str);
+        }
     }
 
     // Wrapper for ACE editor getSelectedText function, used for getting custom bitmaps from editor
     getSelectedText(){
-        return this.ACE_EDITOR.getSelectedText();
+        if(this.isBlockly){
+            const sel = Blockly.getSelected();
+            return (sel && sel.type == 'load_sprite' ? sel.data : "NO BLOCK");
+        }else{
+            return this.ACE_EDITOR.getSelectedText();
+        }
     }
 }
