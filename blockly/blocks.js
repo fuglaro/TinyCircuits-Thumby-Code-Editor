@@ -205,7 +205,8 @@ var blocklyToolbox = {
         {"type": "send_drawn_frame_to_display", "kind": "BLOCK",
           "next": {"block": {"type": "drawFill"}}},
         {"type": "setFPS", "kind": "BLOCK"},
-        {"type": "setFont", "kind": "BLOCK"},
+        {"type": "setFont", "kind": "BLOCK", "gap": "2"},
+        {"type": "setFont_with_sprite", "kind": "BLOCK"},
         {"type": "get_drawn_pixel", "kind": "BLOCK"},
       ]
     },
@@ -301,15 +302,33 @@ bitmap0 = bytearray([0,0,0,0,0,0,0,0,248,8,232,40,40,40,40,40,40,40,40,40,40,232
                      0,0,0,0,0,0,0,31,16,16,16,16,20,18,16,20,18,16,16,16,16,16,31,0,0,0,0,0,0,0,0])`;
       const sprites = workspace.getVariablesOfType('Sprite');
       const dsp = sprites.length ? {"VAR": sprites[0]} : {};
+      const mskdsp = {...dsp, ...(sprites.length > 1 ? {"MSK": sprites[1]} : {})};
       var blocks = [
-          {"type": "load_sprite", "kind": "BLOCK", "data": defaultData},
+          {"type": "load_sprite", "kind": "BLOCK", "gap": "2", "data": defaultData},
+          {"type": "set_transparency", "kind": "BLOCK", "fields": {...dsp}},
           {"type": "drawSprite", "kind": "BLOCK", "gap": "2", "fields": {...dsp}},
+          {"type": "drawSpriteWithMask", "kind": "BLOCK", "gap": "2", "fields": {...mskdsp}},
           {"type": "send_drawn_frame_to_display", "kind": "BLOCK",
             "next": {"block": {"type": "drawFill"}}},
+          {"type": "move_x_to", "kind": "BLOCK", "gap": "2", "fields": {...dsp}, "inputs": {
+            "V": {"shadow": {"type": "math_number", "fields": {"NUM": 30}}}}},
+          {"type": "move_y_to", "kind": "BLOCK", "gap": "2", "fields": {...dsp}, "inputs": {
+            "V": {"shadow": {"type": "math_number", "fields": {"NUM": 20}}}}},
+          {"type": "move_x_by", "kind": "BLOCK", "gap": "2", "fields": {...dsp}, "inputs": {
+            "V": {"shadow": {"type": "math_number", "fields": {"NUM": 1}}}}},
+          {"type": "move_y_by", "kind": "BLOCK", "gap": "2", "fields": {...dsp}, "inputs": {
+            "V": {"shadow": {"type": "math_number", "fields": {"NUM": -1}}}}},
           {"type": "flip", "kind": "BLOCK", "gap": "2", "fields": {...dsp}},
           {"type": "mirror", "kind": "BLOCK", "fields": {...dsp}},
+          {"type": "get_sprite_size", "kind": "BLOCK", "gap": "2", "fields": {...dsp}},
+          {"type": "get_sprite_orien", "kind": "BLOCK", "gap": "2", "fields": {...dsp}},
+          {"type": "get_sprite_frame", "kind": "BLOCK", "fields": {...dsp}},
+          {"type": "setFrame", "kind": "BLOCK", "gap": "2", "fields": {...dsp}, "inputs": {
+            "FRM": {"shadow": {"type": "math_number", "fields": {"NUM": 1}}}}},
         ];
       sprites.forEach((sprite)=>{blocks.unshift({"type": "load_sprite",
+        "data": defaultData, "kind": "BLOCK", "gap": "2", "fields": {"VAR": sprite}})});
+      sprites.reverse().forEach((sprite)=>{blocks.push({"type": "load_anim_sprite",
         "data": defaultData, "kind": "BLOCK", "gap": "2", "fields": {"VAR": sprite}})});
       return blocks;
     }
@@ -775,6 +794,20 @@ Blockly.defineBlocksWithJsonArray([
     "tooltip": "Set the font to use when drawing to the display."
   },
   {
+    "type": "setFont_with_sprite",
+    "message0": 'set %2x%3 font with sprite %1',
+    "args0": [
+      {"name": "VAR", "type": "field_variable",
+        "variableTypes": ["Sprite"], "defaultType": "Sprite"},
+      {"name": "W", "type": "field_number", "value": 5},
+      {"name": "H", "type": "field_number", "value": 7},
+    ],
+    "previousStatement": null,
+    "nextStatement": null,
+    "colour": "%{BKY_GRAPHICS_HUE}",
+    "tooltip": "Set the font from a Sprite to use when drawing to the display."
+  },
+  {
     "type": "load_sprite",
     "message0": '%1 load sprite %2',
     "args0": [
@@ -791,6 +824,23 @@ Blockly.defineBlocksWithJsonArray([
       "Bitmap Builder's IMPORT and EXPORT buttons to edit the Sprite image."
   },
   {
+    "type": "load_anim_sprite",
+    "message0": '%1 load sprite %2 with %3 frames',
+    "args0": [
+      {"name": "IMG", "type": "field_image", "width": 50, "height": 30,
+        "src": "favicon.png"},
+      {"name": "VAR", "type": "field_variable",
+        "variableTypes": ["Sprite"], "defaultType": "Sprite"},
+      {"name": "FRMS", "type": "field_number", "value": 2},
+    ],
+    "previousStatement": null,
+    "nextStatement": null,
+    "colour": "%{BKY_GRAPHICS_HUE}",
+    "extensions": ["del_vars_context_menu", "update_image_from_sprite"],
+    "tooltip": "Similar to the [load sprite] block but works with sprites " +
+      "composed of multiple animation frames, one after the other."
+  },
+  {
     "type": "drawSprite",
     "message0": 'draw %1',
     "args0": [
@@ -801,6 +851,25 @@ Blockly.defineBlocksWithJsonArray([
     "nextStatement": null,
     "colour": "%{BKY_GRAPHICS_HUE}",
     "tooltip": "Draws the Sprite (on the next frame). " +
+      "Display the frame to screen with: [send drawn frame to display]"
+  },
+  {
+    "type": "drawSpriteWithMask",
+    "message0": 'draw %1 with mask %2',
+    "args0": [
+      {"name": "VAR", "type": "field_variable",
+        "variableTypes": ["Sprite"], "defaultType": "Sprite"},
+      {"name": "MSK", "type": "field_variable",
+        "variableTypes": ["Sprite"], "defaultType": "Sprite"},
+    ],
+    "previousStatement": null,
+    "nextStatement": null,
+    "colour": "%{BKY_GRAPHICS_HUE}",
+    "tooltip": "Draws the Sprite with a Mask (on the next frame). " +
+      "The Mask provides a transparency shape with the Mask's black pixels " +
+      "applying transparency. " +
+      "The Mask Sprite must be the same width and height as the drawn Sprite " +
+      "otherwise it will not be displayed. " +
       "Display the frame to screen with: [send drawn frame to display]"
   },
   {
@@ -827,31 +896,123 @@ Blockly.defineBlocksWithJsonArray([
     "colour": "%{BKY_GRAPHICS_HUE}",
     "tooltip": "Mirrors the Sprite left to right."
   },
-
-    // TODO: Sprites
-    //  loading the sprite: only edits the existing class (preserving movement etc)
-    //  drawSprite
-    //  get x position/y position/width/height
-    //  set x to
-    //  set y to
-    //  change x by
-    //  change y by
-    //  send_drawn_frame_to_display
-    //  with mask??? validate same size
-    //  with key???
-    //  setFrame
-    //  getFrame
-    //
-    // TODO: {"type": "setFont_with_sprite", "kind": "BLOCK"},
-    // TODO: add and test setFont_with_sprite by adding Auri's fonts to setFont's dropdown.
-
-
-
-
-
-
-
-
+  {
+    "type": "get_sprite_size",
+    "message0": 'get %1 %2',
+    "args0": [
+      {"name": "VAR", "type": "field_variable",
+        "variableTypes": ["Sprite"], "defaultType": "Sprite"},
+      {"name": "ATTR", "type": "field_dropdown", "options": [
+        ["x position","x"], ["y position","y"],
+        ["width","width"], ["height", "height"]]},
+    ],
+    "output": "Number",
+    "colour": "%{BKY_GRAPHICS_HUE}",
+    "tooltip": "Gets positional and size related data from Sprite."
+  },
+  {
+    "type": "get_sprite_orien",
+    "message0": 'get %1 %2',
+    "args0": [
+      {"name": "VAR", "type": "field_variable",
+        "variableTypes": ["Sprite"], "defaultType": "Sprite"},
+      {"name": "ATTR", "type": "field_dropdown", "options": [
+        ["flipped","mirrorY"], ["mirrorred", "mirrorX"]]},
+    ],
+    "output": "Boolean",
+    "colour": "%{BKY_GRAPHICS_HUE}",
+    "tooltip": "Gets the mirrored or filpped state of a Sprite."
+  },
+  {
+    "type": "move_x_to",
+    "message0": 'move %1 x to %2',
+    "args0": [
+      {"name": "VAR", "type": "field_variable",
+        "variableTypes": ["Sprite"], "defaultType": "Sprite"},
+      {"name": "V", "type": "input_value", "check": "Number"},
+    ],
+    "previousStatement": null,
+    "nextStatement": null,
+    "colour": "%{BKY_GRAPHICS_HUE}",
+    "tooltip": "Moves the Sprite to a new position in the horizontal direction."
+  },
+  {
+    "type": "move_y_to",
+    "message0": 'move %1 y to %2',
+    "args0": [
+      {"name": "VAR", "type": "field_variable",
+        "variableTypes": ["Sprite"], "defaultType": "Sprite"},
+      {"name": "V", "type": "input_value", "check": "Number"},
+    ],
+    "previousStatement": null,
+    "nextStatement": null,
+    "colour": "%{BKY_GRAPHICS_HUE}",
+    "tooltip": "Moves the Sprite to a new position in the vertical direction."
+  },
+  {
+    "type": "move_x_by",
+    "message0": 'move %1 x by %2',
+    "args0": [
+      {"name": "VAR", "type": "field_variable",
+        "variableTypes": ["Sprite"], "defaultType": "Sprite"},
+      {"name": "V", "type": "input_value", "check": "Number"},
+    ],
+    "previousStatement": null,
+    "nextStatement": null,
+    "colour": "%{BKY_GRAPHICS_HUE}",
+    "tooltip": "Moves the Sprite horizontally."
+  },
+  {
+    "type": "move_y_by",
+    "message0": 'move %1 y by %2',
+    "args0": [
+      {"name": "VAR", "type": "field_variable",
+        "variableTypes": ["Sprite"], "defaultType": "Sprite"},
+      {"name": "V", "type": "input_value", "check": "Number"},
+    ],
+    "previousStatement": null,
+    "nextStatement": null,
+    "colour": "%{BKY_GRAPHICS_HUE}",
+    "tooltip": "Moves the Sprite vertically."
+  },
+  {
+    "type": "set_transparency",
+    "message0": 'set %1 transparency %2',
+    "args0": [
+      {"name": "VAR", "type": "field_variable",
+        "variableTypes": ["Sprite"], "defaultType": "Sprite"},
+      {"name": "VAL", "type": "field_dropdown", "options": [
+        ["none","-1"],["black","0"],["white","1"]]},
+    ],
+    "previousStatement": null,
+    "nextStatement": null,
+    "colour": "%{BKY_GRAPHICS_HUE}",
+    "tooltip": "Sets a color to be transparent."
+  },
+  {
+    "type": "get_sprite_frame",
+    "message0": 'get %1 frame number',
+    "args0": [
+      {"name": "VAR", "type": "field_variable",
+        "variableTypes": ["Sprite"], "defaultType": "Sprite"},
+    ],
+    "output": "Number",
+    "colour": "%{BKY_GRAPHICS_HUE}",
+    "tooltip": "Gets the current frame number of an animated Sprite."
+  },
+  {
+    "type": "setFrame",
+    "message0": 'set %1 frame number to %2',
+    "args0": [
+      {"name": "VAR", "type": "field_variable",
+        "variableTypes": ["Sprite"], "defaultType": "Sprite"},
+      {"name": "FRM", "type": "input_value", "check": "Number"},
+    ],
+    "previousStatement": null,
+    "nextStatement": null,
+    "colour": "%{BKY_GRAPHICS_HUE}",
+    "tooltip": "Sets the current frame number for an animated Sprite."
+  },
 ]);
 
 EX.registerMixin('del_vars_context_menu', {
@@ -1174,13 +1335,48 @@ PY['setFont'] = function(block) {
   return `display.setFont("/lib/font5x7.bin", 5, 7, 1)\n`;
 };
 
+PY['setFont_with_sprite'] = function(block) {
+  // Imports sprites as a font with all the fonts characters:
+  //  !"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~
+  var spriteName = PY.nameDB_.getName(block.getFieldValue('VAR'), NM.NameType.VARIABLE);
+  var w = block.getFieldValue('W');
+  var h = block.getFieldValue('H');
+  PY.definitions_['import_graphics'] = 'from thumbyGraphics import display';
+  PY.definitions_['import_io'] = 'import io';
+  PY.definitions_['font_sprite_importer'] = `def __setFontFromBytes__(width, height, data):
+    if width > len(data) or height > 8:
+        return
+    display.textBitmapFile = io.BytesIO(data)
+    display.textWidth = width
+    display.textHeight = height
+    display.textSpaceWidth = 1
+    display.textBitmap = bytearray(width)
+    display.textCharCount = len(data) // width
+`;
+  return `__setFontFromBytes__(${w}, ${h}, ${spriteName}.bitmap)\n`;
+};
+
 PY['load_sprite'] = function(block) {
   var spriteName = PY.nameDB_.getName(block.getFieldValue('VAR'), NM.NameType.VARIABLE);
   PY.definitions_['import_sprite'] = 'from thumbySprite import Sprite';
+  PY.definitions_[`import_sprite_setup_${spriteName}`] = `${spriteName} = Sprite(0,0,[])`;
   return `${spriteName} = Sprite(${block.data
     .replace("# BITMAP: width: ", "")
     .replace(" height: ", "")
-    .replace(/\n\w+ = /, ",")})\n`;
+    .replace(/\n\w+ = /, ",")}, ${spriteName}.x,${spriteName}.y,` +
+    `${spriteName}.key,${spriteName}.mirrorX,${spriteName}.mirrorY)\n`;
+};
+
+PY['load_anim_sprite'] = function(block) {
+  var spriteName = PY.nameDB_.getName(block.getFieldValue('VAR'), NM.NameType.VARIABLE);
+  var frames = block.getFieldValue('FRMS');
+  PY.definitions_['import_sprite'] = 'from thumbySprite import Sprite';
+  PY.definitions_[`import_sprite_setup_${spriteName}`] = `${spriteName} = Sprite(0,0,[])`;
+  return `${spriteName} = Sprite(${block.data
+    .replace("# BITMAP: width: ", "")
+    .replace(", height: ", `//${frames},`)
+    .replace(/\n\w+ = /, ",")}, ${spriteName}.x,${spriteName}.y,` +
+    `${spriteName}.key,${spriteName}.mirrorX,${spriteName}.mirrorY)\n`;
 };
 
 PY['drawSprite'] = function(block) {
@@ -1188,6 +1384,25 @@ PY['drawSprite'] = function(block) {
   PY.definitions_['import_graphics'] = 'from thumbyGraphics import display';
   PY.definitions_[`import_sprite_setup_${spriteName}`] = `${spriteName} = Sprite(0,0,[])`;
   return `display.drawSprite(${spriteName})\n`;
+};
+
+PY['drawSpriteWithMask'] = function(block) {
+  var spriteName = PY.nameDB_.getName(block.getFieldValue('VAR'), NM.NameType.VARIABLE);
+  var maskSprite = PY.nameDB_.getName(block.getFieldValue('MSK'), NM.NameType.VARIABLE);
+  PY.definitions_['import_graphics'] = 'from thumbyGraphics import display';
+  PY.definitions_[`import_sprite_setup_${spriteName}`] = `${spriteName} = Sprite(0,0,[])`;
+  PY.definitions_[`import_sprite_setup_${maskSprite}`] = `${maskSprite} = Sprite(0,0,[])`;
+  return `\
+if ${spriteName}.width == ${maskSprite}.width and ${spriteName}.height == ${maskSprite}.height:
+    display.drawSpriteWithMask(${spriteName}, ${maskSprite})
+`;
+};
+
+PY['set_transparency'] = function(block) {
+  var spriteName = PY.nameDB_.getName(block.getFieldValue('VAR'), NM.NameType.VARIABLE);
+  var val = block.getFieldValue('VAL');
+  PY.definitions_[`import_sprite_setup_${spriteName}`] = `${spriteName} = Sprite(0,0,[])`;
+  return `${spriteName}.key = ${val}\n`;
 };
 
 PY['flip'] = function(block) {
@@ -1200,4 +1415,56 @@ PY['mirror'] = function(block) {
   var spriteName = PY.nameDB_.getName(block.getFieldValue('VAR'), NM.NameType.VARIABLE);
   PY.definitions_[`import_sprite_setup_${spriteName}`] = `${spriteName} = Sprite(0,0,[])`;
   return `${spriteName}.mirrorX = 0 if ${spriteName}.mirrorX else 1\n`;
+};
+
+PY['move_x_to'] = function(block) {
+  var spriteName = PY.nameDB_.getName(block.getFieldValue('VAR'), NM.NameType.VARIABLE);
+  var v = PY.valueToCode(block, 'V', PY.ORDER_ATOMIC);
+  PY.definitions_[`import_sprite_setup_${spriteName}`] = `${spriteName} = Sprite(0,0,[])`;
+  return `${spriteName}.x = ${v}\n`;
+};
+PY['move_y_to'] = function(block) {
+  var spriteName = PY.nameDB_.getName(block.getFieldValue('VAR'), NM.NameType.VARIABLE);
+  var v = PY.valueToCode(block, 'V', PY.ORDER_ATOMIC);
+  PY.definitions_[`import_sprite_setup_${spriteName}`] = `${spriteName} = Sprite(0,0,[])`;
+  return `${spriteName}.y = ${v}\n`;
+};
+PY['move_x_by'] = function(block) {
+  var spriteName = PY.nameDB_.getName(block.getFieldValue('VAR'), NM.NameType.VARIABLE);
+  var v = PY.valueToCode(block, 'V', PY.ORDER_ATOMIC);
+  PY.definitions_[`import_sprite_setup_${spriteName}`] = `${spriteName} = Sprite(0,0,[])`;
+  return `${spriteName}.x += ${v}\n`;
+};
+PY['move_y_by'] = function(block) {
+  var spriteName = PY.nameDB_.getName(block.getFieldValue('VAR'), NM.NameType.VARIABLE);
+  var v = PY.valueToCode(block, 'V', PY.ORDER_ATOMIC);
+  PY.definitions_[`import_sprite_setup_${spriteName}`] = `${spriteName} = Sprite(0,0,[])`;
+  return `${spriteName}.y += ${v}\n`;
+};
+
+PY['get_sprite_size'] = function(block) {
+  var spriteName = PY.nameDB_.getName(block.getFieldValue('VAR'), NM.NameType.VARIABLE);
+  var attr = PY.nameDB_.getName(block.getFieldValue('ATTR'), NM.NameType.VARIABLE);
+  PY.definitions_[`import_sprite_setup_${spriteName}`] = `${spriteName} = Sprite(0,0,[])`;
+  return [`${spriteName}.${attr}`, PY.ORDER_MEMBER];
+};
+
+PY['get_sprite_orien'] = function(block) {
+  var spriteName = PY.nameDB_.getName(block.getFieldValue('VAR'), NM.NameType.VARIABLE);
+  var attr = PY.nameDB_.getName(block.getFieldValue('ATTR'), NM.NameType.VARIABLE);
+  PY.definitions_[`import_sprite_setup_${spriteName}`] = `${spriteName} = Sprite(0,0,[])`;
+  return [`bool(${spriteName}.${attr})`, PY.ORDER_MEMBER];
+};
+
+PY['get_sprite_frame'] = function(block) {
+  var spriteName = PY.nameDB_.getName(block.getFieldValue('VAR'), NM.NameType.VARIABLE);
+  PY.definitions_[`import_sprite_setup_${spriteName}`] = `${spriteName} = Sprite(0,0,[])`;
+  return [`${spriteName}.getFrame()`, PY.ORDER_FUNCTION_CALL];
+};
+
+PY['setFrame'] = function(block) {
+  var spriteName = PY.nameDB_.getName(block.getFieldValue('VAR'), NM.NameType.VARIABLE);
+  var frame = PY.valueToCode(block, 'FRM', PY.ORDER_ATOMIC);
+  PY.definitions_[`import_sprite_setup_${spriteName}`] = `${spriteName} = Sprite(0,0,[])`;
+  return `${spriteName}.setFrame(${frame})\n`;
 };

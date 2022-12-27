@@ -1142,7 +1142,7 @@ class EditorWrapper{
     insert(str){
         if(this.isBlockly){
             const sel = Blockly.getSelected();
-            if(sel && sel.type == 'load_sprite'){
+            if(sel && (sel.type == 'load_sprite' || sel.type == 'load_anim_sprite')){
                 sel.data = str;
                 // Save the changed state of the workspace
                 localStorage.setItem("EditorValue" + this.ID, JSON.stringify(
@@ -1161,7 +1161,7 @@ class EditorWrapper{
     getSelectedText(){
         if(this.isBlockly){
             const sel = Blockly.getSelected();
-            return (sel && sel.type == 'load_sprite' ? sel.data : "NO BLOCK");
+            return (sel && (sel.type == 'load_sprite' || sel.type == 'load_anim_sprite') ? sel.data : "NO BLOCK");
         }else{
             return this.ACE_EDITOR.getSelectedText();
         }
