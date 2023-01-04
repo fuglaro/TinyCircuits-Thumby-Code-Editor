@@ -6,6 +6,24 @@ Blockly.Msg.GRAPHICS_HUE = 30;
 Blockly.Msg.AUDIO_HUE = 45;
 Blockly.Msg.SAVES_HUE = Blockly.Msg.VARIABLES_HUE;
 
+// Overide Blockly's copy and paste so you can copy and paste from one
+// tab to another.
+var _blcpBuf;
+var _blcp = Blockly.ShortcutRegistry.registry.getRegistry()["copy"];
+_blcp.callback = (workspace, e) => {
+  e.preventDefault();
+  workspace.hideChaff();
+  _blcpBuf = Blockly.common.getSelected().toCopyData();
+};
+Blockly.ShortcutRegistry.registry.register(_blcp, opt_allowOverrides=true);
+_blcp = Blockly.ShortcutRegistry.registry.getRegistry()["paste"];
+_blcp.callback = (workspace) => {
+  if (!_blcpBuf) {return false}
+  workspace = workspace.isFlyout ? workspace.targetWorkspace : workspace;
+  return !!(workspace.paste(_blcpBuf.saveInfo));
+};
+Blockly.ShortcutRegistry.registry.register(_blcp, opt_allowOverrides=true);
+
 const PY = Blockly.Python;
 const NM = Blockly.Names;
 const VAR = Blockly.Variables;
