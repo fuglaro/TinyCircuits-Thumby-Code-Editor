@@ -227,7 +227,9 @@ var blocklyToolbox = {
           "Y2": {"shadow": {"type": "math_number", "fields": {"NUM": 5}}}}},
         {"type": "send_drawn_frame_to_display", "kind": "BLOCK",
           "next": {"block": {"type": "drawFill"}}},
-        {"type": "setFPS", "kind": "BLOCK"},
+        {"type": "setFPS", "kind": "BLOCK", "gap": "2", "inputs": {
+          "FPS": {"shadow": {"type": "math_number", "fields": {"NUM": 30}}}}},
+        {"type": "getFPS", "kind": "BLOCK"},
         {"type": "setFont", "kind": "BLOCK", "gap": "2"},
         {"type": "setFont_with_sprite", "kind": "BLOCK"},
         {"type": "get_drawn_pixel", "kind": "BLOCK"},
@@ -806,13 +808,20 @@ Blockly.defineBlocksWithJsonArray([
     "type": "setFPS",
     "message0": 'set FPS %1',
     "args0": [
-      {"name": "FPS", "type": "field_number", "value": 30},
+      {"name": "FPS", "type": "input_value", "check": "Number"},
     ],
     "previousStatement": null,
     "nextStatement": null,
     "colour": "%{BKY_GRAPHICS_HUE}",
     "tooltip": "Set the number of frames per second that will be sent " +
       "to the display with [send drawn frame to display]."
+  },
+  {
+    "type": "getFPS",
+    "message0": 'get FPS',
+    "output": "Number",
+    "colour": "%{BKY_GRAPHICS_HUE}",
+    "tooltip": "Get the number of frames per second currently set."
   },
   {
     "type": "setFont",
@@ -1351,8 +1360,13 @@ PY['display_drawing'] = function(block) {
 
 PY['setFPS'] = function(block) {
   PY.definitions_['import_graphics'] = 'from thumbyGraphics import display';
-  var fps = block.getFieldValue('FPS');
+  var fps = PY.valueToCode(block, 'FPS', PY.ORDER_ATOMIC);
   return `display.setFPS(${fps})\n`;
+};
+
+PY['getFPS'] = function(block) {
+  PY.definitions_['import_graphics'] = 'from thumbyGraphics import display';
+  return [`display.getFPS()`, PY.ORDER_FUNCTION_CALL];
 };
 
 PY['get_drawn_pixel'] = function(block) {
