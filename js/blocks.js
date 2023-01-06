@@ -1374,7 +1374,8 @@ PY['setFont_with_sprite'] = function(block) {
   var h = block.getFieldValue('H');
   PY.definitions_['import_graphics'] = 'from thumbyGraphics import display';
   PY.definitions_['import_io'] = 'import io';
-  PY.definitions_[`import_sprite_setup_${spriteName}`] = `${spriteName} = Sprite(0,0,[])`;
+  PY.definitions_['import_sprite'] = 'from thumbySprite import Sprite';
+  PY.definitions_[`import_sprite_setup_${spriteName}`] = `${spriteName} = Sprite(1,1,bytearray([1]))`;
   PY.definitions_['font_sprite_importer'] = `def __setFontFromBytes__(width, height, data):
     if width > len(data) or height > 8:
         return
@@ -1391,7 +1392,7 @@ PY['setFont_with_sprite'] = function(block) {
 PY['load_sprite'] = function(block) {
   var spriteName = PY.nameDB_.getName(block.getFieldValue('VAR'), NM.NameType.VARIABLE);
   PY.definitions_['import_sprite'] = 'from thumbySprite import Sprite';
-  PY.definitions_[`import_sprite_setup_${spriteName}`] = `${spriteName} = Sprite(0,0,[])`;
+  PY.definitions_[`import_sprite_setup_${spriteName}`] = `${spriteName} = Sprite(1,1,bytearray([1]))`;
   return `${spriteName} = Sprite(${block.data
     .replace("# BITMAP: width: ", "")
     .replace(" height: ", "")
@@ -1403,7 +1404,7 @@ PY['load_anim_sprite'] = function(block) {
   var spriteName = PY.nameDB_.getName(block.getFieldValue('VAR'), NM.NameType.VARIABLE);
   var frames = block.getFieldValue('FRMS');
   PY.definitions_['import_sprite'] = 'from thumbySprite import Sprite';
-  PY.definitions_[`import_sprite_setup_${spriteName}`] = `${spriteName} = Sprite(0,0,[])`;
+  PY.definitions_[`import_sprite_setup_${spriteName}`] = `${spriteName} = Sprite(1,1,bytearray([1]))`;
   return `${spriteName} = Sprite(${block.data
     .replace("# BITMAP: width: ", "")
     .replace(", height: ", `//${frames},`)
@@ -1414,7 +1415,8 @@ PY['load_anim_sprite'] = function(block) {
 PY['drawSprite'] = function(block) {
   var spriteName = PY.nameDB_.getName(block.getFieldValue('VAR'), NM.NameType.VARIABLE);
   PY.definitions_['import_graphics'] = 'from thumbyGraphics import display';
-  PY.definitions_[`import_sprite_setup_${spriteName}`] = `${spriteName} = Sprite(0,0,[])`;
+  PY.definitions_['import_sprite'] = 'from thumbySprite import Sprite';
+  PY.definitions_[`import_sprite_setup_${spriteName}`] = `${spriteName} = Sprite(1,1,bytearray([1]))`;
   return `display.drawSprite(${spriteName})\n`;
 };
 
@@ -1422,8 +1424,9 @@ PY['drawSpriteWithMask'] = function(block) {
   var spriteName = PY.nameDB_.getName(block.getFieldValue('VAR'), NM.NameType.VARIABLE);
   var maskSprite = PY.nameDB_.getName(block.getFieldValue('MSK'), NM.NameType.VARIABLE);
   PY.definitions_['import_graphics'] = 'from thumbyGraphics import display';
-  PY.definitions_[`import_sprite_setup_${spriteName}`] = `${spriteName} = Sprite(0,0,[])`;
-  PY.definitions_[`import_sprite_setup_${maskSprite}`] = `${maskSprite} = Sprite(0,0,[])`;
+  PY.definitions_['import_sprite'] = 'from thumbySprite import Sprite';
+  PY.definitions_[`import_sprite_setup_${spriteName}`] = `${spriteName} = Sprite(1,1,bytearray([1]))`;
+  PY.definitions_[`import_sprite_setup_${maskSprite}`] = `${maskSprite} = Sprite(1,1,bytearray([1]))`;
   return `\
 if ${spriteName}.width == ${maskSprite}.width and ${spriteName}.height == ${maskSprite}.height:
     display.drawSpriteWithMask(${spriteName}, ${maskSprite})
@@ -1433,70 +1436,80 @@ if ${spriteName}.width == ${maskSprite}.width and ${spriteName}.height == ${mask
 PY['set_transparency'] = function(block) {
   var spriteName = PY.nameDB_.getName(block.getFieldValue('VAR'), NM.NameType.VARIABLE);
   var val = block.getFieldValue('VAL');
-  PY.definitions_[`import_sprite_setup_${spriteName}`] = `${spriteName} = Sprite(0,0,[])`;
+  PY.definitions_[`import_sprite_setup_${spriteName}`] = `${spriteName} = Sprite(1,1,bytearray([1]))`;
   return `${spriteName}.key = ${val}\n`;
 };
 
 PY['flip'] = function(block) {
   var spriteName = PY.nameDB_.getName(block.getFieldValue('VAR'), NM.NameType.VARIABLE);
-  PY.definitions_[`import_sprite_setup_${spriteName}`] = `${spriteName} = Sprite(0,0,[])`;
+  PY.definitions_['import_sprite'] = 'from thumbySprite import Sprite';
+  PY.definitions_[`import_sprite_setup_${spriteName}`] = `${spriteName} = Sprite(1,1,bytearray([1]))`;
   return `${spriteName}.mirrorY = 0 if ${spriteName}.mirrorY else 1\n`;
 };
 
 PY['mirror'] = function(block) {
   var spriteName = PY.nameDB_.getName(block.getFieldValue('VAR'), NM.NameType.VARIABLE);
-  PY.definitions_[`import_sprite_setup_${spriteName}`] = `${spriteName} = Sprite(0,0,[])`;
+  PY.definitions_['import_sprite'] = 'from thumbySprite import Sprite';
+  PY.definitions_[`import_sprite_setup_${spriteName}`] = `${spriteName} = Sprite(1,1,bytearray([1]))`;
   return `${spriteName}.mirrorX = 0 if ${spriteName}.mirrorX else 1\n`;
 };
 
 PY['move_x_to'] = function(block) {
   var spriteName = PY.nameDB_.getName(block.getFieldValue('VAR'), NM.NameType.VARIABLE);
   var v = PY.valueToCode(block, 'V', PY.ORDER_ATOMIC);
-  PY.definitions_[`import_sprite_setup_${spriteName}`] = `${spriteName} = Sprite(0,0,[])`;
+  PY.definitions_['import_sprite'] = 'from thumbySprite import Sprite';
+  PY.definitions_[`import_sprite_setup_${spriteName}`] = `${spriteName} = Sprite(1,1,bytearray([1]))`;
   return `${spriteName}.x = ${v}\n`;
 };
 PY['move_y_to'] = function(block) {
   var spriteName = PY.nameDB_.getName(block.getFieldValue('VAR'), NM.NameType.VARIABLE);
   var v = PY.valueToCode(block, 'V', PY.ORDER_ATOMIC);
-  PY.definitions_[`import_sprite_setup_${spriteName}`] = `${spriteName} = Sprite(0,0,[])`;
+  PY.definitions_['import_sprite'] = 'from thumbySprite import Sprite';
+  PY.definitions_[`import_sprite_setup_${spriteName}`] = `${spriteName} = Sprite(1,1,bytearray([1]))`;
   return `${spriteName}.y = ${v}\n`;
 };
 PY['move_x_by'] = function(block) {
   var spriteName = PY.nameDB_.getName(block.getFieldValue('VAR'), NM.NameType.VARIABLE);
   var v = PY.valueToCode(block, 'V', PY.ORDER_ATOMIC);
-  PY.definitions_[`import_sprite_setup_${spriteName}`] = `${spriteName} = Sprite(0,0,[])`;
+  PY.definitions_['import_sprite'] = 'from thumbySprite import Sprite';
+  PY.definitions_[`import_sprite_setup_${spriteName}`] = `${spriteName} = Sprite(1,1,bytearray([1]))`;
   return `${spriteName}.x += ${v}\n`;
 };
 PY['move_y_by'] = function(block) {
   var spriteName = PY.nameDB_.getName(block.getFieldValue('VAR'), NM.NameType.VARIABLE);
   var v = PY.valueToCode(block, 'V', PY.ORDER_ATOMIC);
-  PY.definitions_[`import_sprite_setup_${spriteName}`] = `${spriteName} = Sprite(0,0,[])`;
+  PY.definitions_['import_sprite'] = 'from thumbySprite import Sprite';
+  PY.definitions_[`import_sprite_setup_${spriteName}`] = `${spriteName} = Sprite(1,1,bytearray([1]))`;
   return `${spriteName}.y += ${v}\n`;
 };
 
 PY['get_sprite_size'] = function(block) {
   var spriteName = PY.nameDB_.getName(block.getFieldValue('VAR'), NM.NameType.VARIABLE);
   var attr = PY.nameDB_.getName(block.getFieldValue('ATTR'), NM.NameType.VARIABLE);
-  PY.definitions_[`import_sprite_setup_${spriteName}`] = `${spriteName} = Sprite(0,0,[])`;
+  PY.definitions_['import_sprite'] = 'from thumbySprite import Sprite';
+  PY.definitions_[`import_sprite_setup_${spriteName}`] = `${spriteName} = Sprite(1,1,bytearray([1]))`;
   return [`${spriteName}.${attr}`, PY.ORDER_MEMBER];
 };
 
 PY['get_sprite_orien'] = function(block) {
   var spriteName = PY.nameDB_.getName(block.getFieldValue('VAR'), NM.NameType.VARIABLE);
   var attr = PY.nameDB_.getName(block.getFieldValue('ATTR'), NM.NameType.VARIABLE);
-  PY.definitions_[`import_sprite_setup_${spriteName}`] = `${spriteName} = Sprite(0,0,[])`;
+  PY.definitions_['import_sprite'] = 'from thumbySprite import Sprite';
+  PY.definitions_[`import_sprite_setup_${spriteName}`] = `${spriteName} = Sprite(1,1,bytearray([1]))`;
   return [`bool(${spriteName}.${attr})`, PY.ORDER_MEMBER];
 };
 
 PY['get_sprite_frame'] = function(block) {
   var spriteName = PY.nameDB_.getName(block.getFieldValue('VAR'), NM.NameType.VARIABLE);
-  PY.definitions_[`import_sprite_setup_${spriteName}`] = `${spriteName} = Sprite(0,0,[])`;
+  PY.definitions_['import_sprite'] = 'from thumbySprite import Sprite';
+  PY.definitions_[`import_sprite_setup_${spriteName}`] = `${spriteName} = Sprite(1,1,bytearray([1]))`;
   return [`${spriteName}.getFrame()`, PY.ORDER_FUNCTION_CALL];
 };
 
 PY['setFrame'] = function(block) {
   var spriteName = PY.nameDB_.getName(block.getFieldValue('VAR'), NM.NameType.VARIABLE);
   var frame = PY.valueToCode(block, 'FRM', PY.ORDER_ATOMIC);
-  PY.definitions_[`import_sprite_setup_${spriteName}`] = `${spriteName} = Sprite(0,0,[])`;
+  PY.definitions_['import_sprite'] = 'from thumbySprite import Sprite';
+  PY.definitions_[`import_sprite_setup_${spriteName}`] = `${spriteName} = Sprite(1,1,bytearray([1]))`;
   return `${spriteName}.setFrame(${frame})\n`;
 };
