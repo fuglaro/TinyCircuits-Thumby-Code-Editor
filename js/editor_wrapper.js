@@ -1260,7 +1260,8 @@ class EditorWrapper{
     // Expose common Ace editor operation
     getValue(){
         if(this.isBlockly){
-            return Blockly.Python.workspaceToCode(this.BLOCKLY_WORKSPACE);
+            return blockly_fix_for_micropython(
+							Blockly.Python.workspaceToCode(this.BLOCKLY_WORKSPACE));
         }else{
             return this.ACE_EDITOR.getValue();
         }

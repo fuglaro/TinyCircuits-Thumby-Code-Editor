@@ -24,6 +24,11 @@ _blcp.callback = (workspace) => {
 };
 Blockly.ShortcutRegistry.registry.register(_blcp, opt_allowOverrides=true);
 
+// Fix anything Blockly did that wouldn't work for MicroPython
+function blockly_fix_for_micropython(code){
+	return code.replace("from numbers import Number\n", "Number = int\n");
+}
+
 const PY = Blockly.Python;
 const NM = Blockly.Names;
 const VAR = Blockly.Variables;
