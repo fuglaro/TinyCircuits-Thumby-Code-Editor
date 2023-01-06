@@ -1366,7 +1366,7 @@ PY['setFPS'] = function(block) {
 
 PY['getFPS'] = function(block) {
   PY.definitions_['import_graphics'] = 'from thumbyGraphics import display';
-  return [`display.getFPS()`, PY.ORDER_FUNCTION_CALL];
+  return [`display.frameRate`, PY.ORDER_FUNCTION_CALL];
 };
 
 PY['get_drawn_pixel'] = function(block) {
