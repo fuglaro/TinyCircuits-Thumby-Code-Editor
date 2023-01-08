@@ -101,7 +101,6 @@ class EditorWrapper{
                 cleanUp();
                 this.state['isBlockly'] = true;
                 this.initEditorPanelUI(state["value"]);
-                this.setupBlockly(state["value"]);
             };
         }else{
             this.initEditorPanelUI(state["value"]);
@@ -638,6 +637,9 @@ class EditorWrapper{
         // This must run after the Editor is added to the DOM document
         // otherwise Blockly will refuse to initialise itself.
         this._container.addEventListener("show", ()=>{this.setupBlockly(data)});
+        if(document.body.contains(this.BLOCKLY_DIV)){
+            this.setupBlockly(data);
+        }
     }
 
     setupBlockly(data){
