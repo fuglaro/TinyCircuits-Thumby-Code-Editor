@@ -231,7 +231,8 @@ var blocklyToolbox = {
           "FPS": {"shadow": {"type": "math_number", "fields": {"NUM": 30}}}}},
         {"type": "getFPS", "kind": "BLOCK"},
         {"type": "setFont", "kind": "BLOCK", "gap": "2"},
-        {"type": "setFont_with_sprite", "kind": "BLOCK"},
+        {"type": "setFont_with_sprite", "kind": "BLOCK", "gap": "2"},
+        {"type": "setFont_gap", "kind": "BLOCK"},
         {"type": "get_drawn_pixel", "kind": "BLOCK"},
       ]
     },
@@ -400,7 +401,7 @@ Blockly.defineBlocksWithJsonArray([
         "variableTypes": ["Timer"], "defaultType": "Timer"},
       {"name": "MODE", "type": "field_dropdown", "options":
         [["every","PERIODIC"], ["once in","ONE_SHOT"]]},
-      {"name": "INTERVAL", "type": "field_number", "value": 1000},
+      {"name": "INTERVAL", "type": "field_number", "value": 1000, "min": 0},
     ],
     "message1": '%1',
     "args1": [
@@ -437,7 +438,7 @@ Blockly.defineBlocksWithJsonArray([
     "type": "set_freq",
     "message0": 'set core frequency %1 Hz',
     "args0": [
-      {"name": "freq", "type": "field_number", "value": 125000000},
+      {"name": "freq", "type": "field_number", "value": 125000000, "min": 10000, "max": 250000000},
     ],
     "previousStatement": null,
     "nextStatement": null,
@@ -843,13 +844,24 @@ Blockly.defineBlocksWithJsonArray([
     "args0": [
       {"name": "VAR", "type": "field_variable",
         "variableTypes": ["Sprite"], "defaultType": "Sprite"},
-      {"name": "W", "type": "field_number", "value": 5},
-      {"name": "H", "type": "field_number", "value": 7},
+      {"name": "W", "type": "field_number", "value": 5, "min": 1},
+      {"name": "H", "type": "field_number", "value": 7, "min": 1, "max": 8},
     ],
     "previousStatement": null,
     "nextStatement": null,
     "colour": "%{BKY_GRAPHICS_HUE}",
     "tooltip": "Set the font from a Sprite to use when drawing to the display."
+  },
+  {
+    "type": "setFont_gap",
+    "message0": 'set font gap %1',
+    "args0": [
+      {"name": "GAP", "type": "field_number", "value": 1, "min": 0},
+    ],
+    "previousStatement": null,
+    "nextStatement": null,
+    "colour": "%{BKY_GRAPHICS_HUE}",
+    "tooltip": "Set the horizontal spacing between each character of drawn text."
   },
   {
     "type": "load_sprite",
@@ -875,7 +887,7 @@ Blockly.defineBlocksWithJsonArray([
         "src": "favicon.png"},
       {"name": "VAR", "type": "field_variable",
         "variableTypes": ["Sprite"], "defaultType": "Sprite"},
-      {"name": "FRMS", "type": "field_number", "value": 2},
+      {"name": "FRMS", "type": "field_number", "value": 2, "min": 1},
     ],
     "previousStatement": null,
     "nextStatement": null,
@@ -1381,9 +1393,12 @@ PY['setFont'] = function(block) {
   PY.definitions_['import_graphics'] = 'from thumbyGraphics import display';
   var font = block.getFieldValue('FONT');
   if (font == "TC-8x8") {
-    return `display.setFont("/lib/font8x8.bin", 8, 8, 1)\n`
+    return `display.setFont("/lib/font8x8.bin", 8, 8, display.textSpaceWidth)\n`
   }
-  return `display.setFont("/lib/font5x7.bin", 5, 7, 1)\n`;
+  else if (font == "TC-3x5") {
+    return `display.setFont("/lib/font3x5.bin", 3, 5, display.textSpaceWidth)\n`
+  }
+  return `display.setFont("/lib/font5x7.bin", 5, 7, display.textSpaceWidth)\n`;
 };
 
 PY['setFont_with_sprite'] = function(block) {
@@ -1402,11 +1417,16 @@ PY['setFont_with_sprite'] = function(block) {
     display.textBitmapFile = io.BytesIO(data)
     display.textWidth = width
     display.textHeight = height
-    display.textSpaceWidth = 1
     display.textBitmap = bytearray(width)
     display.textCharCount = len(data) // width
 `;
   return `__setFontFromBytes__(${w}, ${h}, ${spriteName}.bitmap)\n`;
+};
+
+PY['setFont_gap'] = function(block) {
+  PY.definitions_['import_graphics'] = 'from thumbyGraphics import display';
+  var gap = block.getFieldValue('GAP');
+  return `display.textSpaceWidth = ${gap}\n`
 };
 
 PY['load_sprite'] = function(block) {
