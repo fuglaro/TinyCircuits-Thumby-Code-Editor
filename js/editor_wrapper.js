@@ -754,6 +754,14 @@ class EditorWrapper{
                 }
                 this.setTitle("Editor" + this.ID + ' - *' + this.EDITOR_PATH);
             }
+            // Ensure all Blockly editors have a path set. Let's keep it simple for the <3n00bs<3
+            if(!this.EDITOR_PATH){
+                var fileNum = 1;
+                while(this.checkAllEditorsForPath(`/Games/NewGame${fileNum}/NewGame${fileNum}.py`)){
+                    fileNum += 1;
+                }
+                this.setPath(`/Games/NewGame${fileNum}/NewGame${fileNum}.py`);
+            }
         }
         this.resize();
     }
@@ -1005,6 +1013,13 @@ class EditorWrapper{
 
 
     setPath(path){
+        // Blockly editors are only ever python files in disguise, and may
+        // have been loaded from a .blocks file or other sensible extension.
+        // Adjust this so it will run in the emulator.
+        if(this.isBlockly && !path.endsWith(".py")){
+            path += ".py";
+        }
+
         this.EDITOR_PATH = path;
         localStorage.setItem("EditorPath" + this.ID, this.EDITOR_PATH);
     }
