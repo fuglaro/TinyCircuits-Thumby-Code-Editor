@@ -828,6 +828,7 @@ Blockly.defineBlocksWithJsonArray([
     "message0": 'set font %1',
     "args0": [
       {"name": "FONT", "type": "field_dropdown", "options": [
+        ["TC-3x5","TC-3x5"],
         ["TC-5x7","TC-5x7"],
         ["TC-8x8","TC-8x8"]]},
     ],
