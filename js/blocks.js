@@ -26,7 +26,7 @@ Blockly.ShortcutRegistry.registry.register(_blcp, opt_allowOverrides=true);
 
 // Fix anything Blockly did that wouldn't work for MicroPython
 function blockly_fix_for_micropython(code){
-	return code.replace("from numbers import Number\n", "Number = int\n");
+  return code.replace("from numbers import Number\n", "Number = int\n");
 }
 
 const PY = Blockly.Python;
@@ -349,6 +349,8 @@ bitmap0 = bytearray([0,0,0,0,0,0,0,0,248,8,232,40,40,40,40,40,40,40,40,40,40,232
           {"type": "get_sprite_size", "kind": "BLOCK", "gap": "2", "fields": {...dsp}},
           {"type": "get_sprite_orien", "kind": "BLOCK", "gap": "2", "fields": {...dsp}},
           {"type": "get_sprite_frame", "kind": "BLOCK", "fields": {...dsp}},
+          {"type": "sprite_to_var", "kind": "BLOCK", "fields": {...dsp}, "gap": "2"},
+          {"type": "var_to_sprite", "kind": "BLOCK", "fields": {...dsp}},
           {"type": "setFrame", "kind": "BLOCK", "gap": "2", "fields": {...dsp}, "inputs": {
             "FRM": {"shadow": {"type": "math_number", "fields": {"NUM": 1}}}}},
         ];
@@ -1069,6 +1071,33 @@ Blockly.defineBlocksWithJsonArray([
     "colour": "%{BKY_GRAPHICS_HUE}",
     "tooltip": "Sets the current frame number for an animated Sprite."
   },
+  {
+    "type": "sprite_to_var",
+    "message0": 'var from %1',
+    "args0": [
+      {"name": "VAR", "type": "field_variable",
+        "variableTypes": ["Sprite"], "defaultType": "Sprite"},
+    ],
+    "output": "Sprite",
+    "colour": "%{BKY_GRAPHICS_HUE}",
+    "tooltip": "Create a new Sprite in the form of a variable with all the " +
+      "image, position, and orientation information copied."
+  },
+  {
+    "type": "var_to_sprite",
+    "message0": 'load %1 with var %2',
+    "args0": [
+      {"name": "VAR", "type": "field_variable",
+        "variableTypes": ["Sprite"], "defaultType": "Sprite"},
+      {"name": "SRC", "type": "field_variable"},
+    ],
+    "previousStatement": null,
+    "nextStatement": null,
+    "colour": "%{BKY_GRAPHICS_HUE}",
+    "extensions": ["del_vars_context_menu"],
+    "tooltip": "Load a stored sprite Variable into a Sprite for use. " +
+      "Changes made to the loaded Sprite will also be made to the Variable."
+  },
 ]);
 
 EX.registerMixin('del_vars_context_menu', {
@@ -1154,13 +1183,13 @@ PY['get_freq'] = function(block) {
 
 PY['lightsleep'] = function(block) {
   PY.definitions_['import_machine'] = 'import machine';
-  var time = PY.valueToCode(block, 'TIME', PY.ORDER_ATOMIC);
+  var time = PY.valueToCode(block, 'TIME', PY.ORDER_NONE);
   return `machine.lightsleep(${time})\n`;
 };
 
 PY['brightness'] = function(block) {
   PY.definitions_['import_graphics'] = 'from thumbyGraphics import display';
-  var val = PY.valueToCode(block, 'VAL', PY.ORDER_ATOMIC);
+  var val = PY.valueToCode(block, 'VAL', PY.ORDER_NONE);
   return `display.brightness(${val})\n`;
 };
 
@@ -1171,12 +1200,12 @@ PY['screen_dimensions'] = function(block) {
 };
 
 PY['exec_python'] = function(block) {
-  var command = PY.valueToCode(block, 'command', PY.ORDER_ATOMIC);
+  var command = PY.valueToCode(block, 'command', PY.ORDER_NONE);
   return `exec(${command})\n`;
 };
 
 PY['exec_python_output'] = function(block) {
-  var command = PY.valueToCode(block, 'command', PY.ORDER_ATOMIC);
+  var command = PY.valueToCode(block, 'command', PY.ORDER_NONE);
   return [`eval(${command})`, PY.ORDER_FUNCTION_CALL];
 };
 
@@ -1192,19 +1221,19 @@ PY["gc_collect"] = function(block) {
 };
 
 PY['var_to_str'] = function(block) {
-  var variable = PY.valueToCode(block, 'var', PY.ORDER_ATOMIC);
+  var variable = PY.valueToCode(block, 'var', PY.ORDER_NONE);
   return [`str(${variable})`, PY.ORDER_FUNCTION_CALL];
 };
 
 
 PY['var_to_int'] = function(block) {
-  var variable = PY.valueToCode(block, 'var', PY.ORDER_ATOMIC);
+  var variable = PY.valueToCode(block, 'var', PY.ORDER_NONE);
   return [`int(${variable})`, PY.ORDER_FUNCTION_CALL];
 };
 
 
 PY['var_to_float'] = function(block) {
-  var variable = PY.valueToCode(block, 'var', PY.ORDER_ATOMIC);
+  var variable = PY.valueToCode(block, 'var', PY.ORDER_NONE);
   return [`float(${variable})`, PY.ORDER_FUNCTION_CALL];
 };
 
@@ -1246,15 +1275,15 @@ PY['button_justPressed'] = PY['button_pressed'];
 
 PY['audio_play'] = function(block) {
   PY.definitions_['import_audio'] = 'from thumbyAudio import audio';
-  var freq = PY.valueToCode(block, 'FREQ', PY.ORDER_ATOMIC);
-  var duration = PY.valueToCode(block, 'DURATION', PY.ORDER_ATOMIC);
+  var freq = PY.valueToCode(block, 'FREQ', PY.ORDER_NONE);
+  var duration = PY.valueToCode(block, 'DURATION', PY.ORDER_NONE);
   return `audio.play(${freq}, ${duration})\n`;
 };
 
 PY['audio_playBlocking'] = function(block) {
   PY.definitions_['import_audio'] = 'from thumbyAudio import audio';
-  var freq = PY.valueToCode(block, 'FREQ', PY.ORDER_ATOMIC);
-  var duration = PY.valueToCode(block, 'DURATION', PY.ORDER_ATOMIC);
+  var freq = PY.valueToCode(block, 'FREQ', PY.ORDER_NONE);
+  var duration = PY.valueToCode(block, 'DURATION', PY.ORDER_NONE);
   return `audio.playBlocking(${freq}, ${duration})\n`;
 };
 
@@ -1313,7 +1342,7 @@ PY['print_to_display'] = function(block) {
           display.drawText(line, 0, (display.textHeight+1)*ln, 1)
       display.display.show()
   `
-  var val = PY.valueToCode(block, 'VAL', PY.ORDER_ATOMIC) || "''";
+  var val = PY.valueToCode(block, 'VAL', PY.ORDER_NONE) || "''";
   return `__print_to_display__(${val})\n`;
 };
 
@@ -1325,8 +1354,8 @@ PY['send_drawn_frame_to_display'] = function(block) {
 PY['drawPixel'] = function(block) {
   PY.definitions_['import_graphics'] = 'from thumbyGraphics import display';
   var col = block.getFieldValue('COL');
-  var x = PY.valueToCode(block, 'X', PY.ORDER_ATOMIC);
-  var y = PY.valueToCode(block, 'Y', PY.ORDER_ATOMIC);
+  var x = PY.valueToCode(block, 'X', PY.ORDER_NONE);
+  var y = PY.valueToCode(block, 'Y', PY.ORDER_NONE);
   return `display.setPixel(${x}, ${y}, ${col})\n`;
 };
 
@@ -1339,19 +1368,19 @@ PY['drawFill'] = function(block) {
 PY['drawText'] = function(block) {
   PY.definitions_['import_graphics'] = 'from thumbyGraphics import display';
   var col = block.getFieldValue('COL');
-  var val = PY.valueToCode(block, 'VAL', PY.ORDER_ATOMIC);
-  var x = PY.valueToCode(block, 'X', PY.ORDER_ATOMIC);
-  var y = PY.valueToCode(block, 'Y', PY.ORDER_ATOMIC);
+  var val = PY.valueToCode(block, 'VAL', PY.ORDER_NONE);
+  var x = PY.valueToCode(block, 'X', PY.ORDER_NONE);
+  var y = PY.valueToCode(block, 'Y', PY.ORDER_NONE);
   return `display.drawText(${val}, ${x}, ${y}, ${col})\n`;
 };
 
 PY['drawLine'] = function(block) {
   PY.definitions_['import_graphics'] = 'from thumbyGraphics import display';
   var col = block.getFieldValue('COL');
-  var x = PY.valueToCode(block, 'X', PY.ORDER_ATOMIC);
-  var y = PY.valueToCode(block, 'Y', PY.ORDER_ATOMIC);
-  var x2 = PY.valueToCode(block, 'X2', PY.ORDER_ATOMIC);
-  var y2 = PY.valueToCode(block, 'Y2', PY.ORDER_ATOMIC);
+  var x = PY.valueToCode(block, 'X', PY.ORDER_NONE);
+  var y = PY.valueToCode(block, 'Y', PY.ORDER_NONE);
+  var x2 = PY.valueToCode(block, 'X2', PY.ORDER_NONE);
+  var y2 = PY.valueToCode(block, 'Y2', PY.ORDER_NONE);
   return `display.drawLine(${x}, ${y}, ${x2}, ${y2}, ${col})\n`;
 };
 
@@ -1359,10 +1388,10 @@ PY['drawRectangle'] = function(block) {
   PY.definitions_['import_graphics'] = 'from thumbyGraphics import display';
   var col = block.getFieldValue('COL');
   var shape = block.getFieldValue('SHAPE');
-  var x = PY.valueToCode(block, 'X', PY.ORDER_ATOMIC);
-  var y = PY.valueToCode(block, 'Y', PY.ORDER_ATOMIC);
-  var x2 = PY.valueToCode(block, 'X2', PY.ORDER_ATOMIC);
-  var y2 = PY.valueToCode(block, 'Y2', PY.ORDER_ATOMIC);
+  var x = PY.valueToCode(block, 'X', PY.ORDER_NONE);
+  var y = PY.valueToCode(block, 'Y', PY.ORDER_NONE);
+  var x2 = PY.valueToCode(block, 'X2', PY.ORDER_NONE);
+  var y2 = PY.valueToCode(block, 'Y2', PY.ORDER_NONE);
   return `display.draw${shape}(${x}, ${y}, ${x2}, ${y2}, ${col})\n`;
 };
 
@@ -1373,7 +1402,7 @@ PY['display_drawing'] = function(block) {
 
 PY['setFPS'] = function(block) {
   PY.definitions_['import_graphics'] = 'from thumbyGraphics import display';
-  var fps = PY.valueToCode(block, 'FPS', PY.ORDER_ATOMIC);
+  var fps = PY.valueToCode(block, 'FPS', PY.ORDER_NONE);
   return `display.setFPS(${fps})\n`;
 };
 
@@ -1384,8 +1413,8 @@ PY['getFPS'] = function(block) {
 
 PY['get_drawn_pixel'] = function(block) {
   PY.definitions_['import_graphics'] = 'from thumbyGraphics import display';
-  var x = PY.valueToCode(block, 'X', PY.ORDER_ATOMIC) || 0;
-  var y = PY.valueToCode(block, 'Y', PY.ORDER_ATOMIC) || 0;
+  var x = PY.valueToCode(block, 'X', PY.ORDER_NONE) || 0;
+  var y = PY.valueToCode(block, 'Y', PY.ORDER_NONE) || 0;
   return [`display.getPixel(${x}, ${y})`, PY.ORDER_FUNCTION_CALL];
 };
 
@@ -1496,28 +1525,28 @@ PY['mirror'] = function(block) {
 
 PY['move_x_to'] = function(block) {
   var spriteName = PY.nameDB_.getName(block.getFieldValue('VAR'), NM.NameType.VARIABLE);
-  var v = PY.valueToCode(block, 'V', PY.ORDER_ATOMIC);
+  var v = PY.valueToCode(block, 'V', PY.ORDER_NONE);
   PY.definitions_['import_sprite'] = 'from thumbySprite import Sprite';
   PY.definitions_[`import_sprite_setup_${spriteName}`] = `${spriteName} = Sprite(1,1,bytearray([1]))`;
   return `${spriteName}.x = ${v}\n`;
 };
 PY['move_y_to'] = function(block) {
   var spriteName = PY.nameDB_.getName(block.getFieldValue('VAR'), NM.NameType.VARIABLE);
-  var v = PY.valueToCode(block, 'V', PY.ORDER_ATOMIC);
+  var v = PY.valueToCode(block, 'V', PY.ORDER_NONE);
   PY.definitions_['import_sprite'] = 'from thumbySprite import Sprite';
   PY.definitions_[`import_sprite_setup_${spriteName}`] = `${spriteName} = Sprite(1,1,bytearray([1]))`;
   return `${spriteName}.y = ${v}\n`;
 };
 PY['move_x_by'] = function(block) {
   var spriteName = PY.nameDB_.getName(block.getFieldValue('VAR'), NM.NameType.VARIABLE);
-  var v = PY.valueToCode(block, 'V', PY.ORDER_ATOMIC);
+  var v = PY.valueToCode(block, 'V', PY.ORDER_NONE);
   PY.definitions_['import_sprite'] = 'from thumbySprite import Sprite';
   PY.definitions_[`import_sprite_setup_${spriteName}`] = `${spriteName} = Sprite(1,1,bytearray([1]))`;
   return `${spriteName}.x += ${v}\n`;
 };
 PY['move_y_by'] = function(block) {
   var spriteName = PY.nameDB_.getName(block.getFieldValue('VAR'), NM.NameType.VARIABLE);
-  var v = PY.valueToCode(block, 'V', PY.ORDER_ATOMIC);
+  var v = PY.valueToCode(block, 'V', PY.ORDER_NONE);
   PY.definitions_['import_sprite'] = 'from thumbySprite import Sprite';
   PY.definitions_[`import_sprite_setup_${spriteName}`] = `${spriteName} = Sprite(1,1,bytearray([1]))`;
   return `${spriteName}.y += ${v}\n`;
@@ -1548,8 +1577,22 @@ PY['get_sprite_frame'] = function(block) {
 
 PY['setFrame'] = function(block) {
   var spriteName = PY.nameDB_.getName(block.getFieldValue('VAR'), NM.NameType.VARIABLE);
-  var frame = PY.valueToCode(block, 'FRM', PY.ORDER_ATOMIC);
+  var frame = PY.valueToCode(block, 'FRM', PY.ORDER_NONE);
   PY.definitions_['import_sprite'] = 'from thumbySprite import Sprite';
   PY.definitions_[`import_sprite_setup_${spriteName}`] = `${spriteName} = Sprite(1,1,bytearray([1]))`;
   return `${spriteName}.setFrame(${frame})\n`;
+};
+
+PY['sprite_to_var'] = function(block) {
+  var s = PY.nameDB_.getName(block.getFieldValue('VAR'), NM.NameType.VARIABLE);
+  PY.definitions_['import_sprite'] = 'from thumbySprite import Sprite';
+  return [`Sprite(${s}.width,${s}.height,${s}.bitmapSource,${s}.x,${s}.y,${s}.key,${s}.mirrorX,${s}.mirrorY)`, PY.ORDER_FUNCTION_CALL];
+};
+
+PY['var_to_sprite'] = function(block) {
+  var spriteName = PY.nameDB_.getName(block.getFieldValue('VAR'), NM.NameType.VARIABLE);
+  var frm = PY.nameDB_.getName(block.getFieldValue('SRC'), NM.NameType.VARIABLE);
+  PY.definitions_['import_sprite'] = 'from thumbySprite import Sprite';
+  PY.definitions_[`import_sprite_setup_${spriteName}`] = `${spriteName} = Sprite(1,1,bytearray([1]))`;
+  return `${spriteName} = ${frm} if isinstance(${frm}, Sprite) else Sprite(1,1,bytearray([1]))\n`
 };
