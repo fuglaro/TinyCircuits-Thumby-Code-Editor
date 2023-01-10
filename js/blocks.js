@@ -647,7 +647,7 @@ Blockly.defineBlocksWithJsonArray([
   },
   {
     "type": "saves_hasItem",
-    "message0": '%1 was set',
+    "message0": 'is %1 set',
     "args0": [
       {"name": "KEY", "type": "field_input", "text": "high score"},
     ],
