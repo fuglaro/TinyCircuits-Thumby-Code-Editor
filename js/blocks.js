@@ -1322,7 +1322,7 @@ PY['saves_delItem'] = function(block) {
   PY.definitions_['import_saves'] = 'from thumbySaves import saveData';
   PY.definitions_['saves_saveData_setName'] = defSaveSsetName;
   var key = PY.quote_(block.getFieldValue('KEY'));
-  return `saveData.delItem(${key})`;
+  return `saveData.delItem(${key})\n`;
 };
 
 PY['print_to_display'] = function(block) {
