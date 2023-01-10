@@ -802,10 +802,10 @@ Blockly.defineBlocksWithJsonArray([
       {"name": "X", "type": "input_value", "check": "Number", "align": "RIGHT"},
       {"name": "Y", "type": "input_value", "check": "Number", "align": "RIGHT"},
     ],
-    "output": "Number",
+    "output": "Boolean",
     "colour": "%{BKY_GRAPHICS_HUE}",
     "tooltip": "Detect the value of the pixel drawn for the next frame: " +
-      "white gives 1, and black gives 0."
+      "white gives True, and black gives False."
   },
   {
     "type": "setFPS",
@@ -1415,7 +1415,7 @@ PY['get_drawn_pixel'] = function(block) {
   PY.definitions_['import_graphics'] = 'from thumbyGraphics import display';
   var x = PY.valueToCode(block, 'X', PY.ORDER_NONE) || 0;
   var y = PY.valueToCode(block, 'Y', PY.ORDER_NONE) || 0;
-  return [`display.getPixel(${x}, ${y})`, PY.ORDER_FUNCTION_CALL];
+  return [`bool(display.getPixel(${x}, ${y}))`, PY.ORDER_FUNCTION_CALL];
 };
 
 PY['setFont'] = function(block) {
