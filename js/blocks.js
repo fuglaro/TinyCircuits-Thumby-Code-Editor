@@ -722,7 +722,7 @@ Blockly.defineBlocksWithJsonArray([
         [["white","1"], ["black","0"]]},
       {"name": "X", "type": "input_value", "check": "Number", "align": "RIGHT"},
       {"name": "Y", "type": "input_value", "check": "Number", "align": "RIGHT"},
-      {"name": "VAL", "type": "input_value", "check": "String"},
+      {"name": "VAL", "type": "input_value"},
     ],
     "previousStatement": null,
     "nextStatement": null,
@@ -1371,7 +1371,7 @@ PY['drawText'] = function(block) {
   var val = PY.valueToCode(block, 'VAL', PY.ORDER_NONE);
   var x = PY.valueToCode(block, 'X', PY.ORDER_NONE);
   var y = PY.valueToCode(block, 'Y', PY.ORDER_NONE);
-  return `display.drawText(${val}, ${x}, ${y}, ${col})\n`;
+  return `display.drawText(str(${val}), ${x}, ${y}, ${col})\n`;
 };
 
 PY['drawLine'] = function(block) {
