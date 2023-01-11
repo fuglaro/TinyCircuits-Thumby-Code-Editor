@@ -353,6 +353,7 @@ bitmap0 = bytearray([0,0,0,0,0,0,0,0,248,8,232,40,40,40,40,40,40,40,40,40,40,232
           {"type": "var_to_sprite", "kind": "BLOCK", "fields": {...dsp}},
           {"type": "setFrame", "kind": "BLOCK", "gap": "2", "fields": {...dsp}, "inputs": {
             "FRM": {"shadow": {"type": "math_number", "fields": {"NUM": 1}}}}},
+          {"type": "load_anim_sprite", "kind": "BLOCK", "gap": "2", "data": defaultData},
         ];
       sprites.forEach((sprite)=>{blocks.unshift({"type": "load_sprite",
         "data": defaultData, "kind": "BLOCK", "gap": "2", "fields": {"VAR": sprite}})});
